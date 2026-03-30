@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASIN Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: #e0ddd4;
+  --border2: #ccc9be;
+  --text: #1a1916;
+  --text2: #6b6860;
+  --text3: #a09e99;
+  --blue: #1a4fd6;
+  --blue-bg: #eef2fd;
+  --green: #1a7a3c;
+  --green-bg: #eaf5ee;
+  --red: #c0392b;
+  --red-bg: #fdecea;
+  --amber: #a05c00;
+  --amber-bg: #fdf3e3;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --radius: 6px;
+  --radius-lg: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
+
+/* HEADER */
+.header { background: var(--text); color: #fff; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.header-logo { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: .04em; color: #fff; display: flex; align-items: center; gap: 10px; }
+.header-logo span { background: var(--blue); color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 3px; letter-spacing: .06em; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.sync-status { font-family: var(--mono); font-size: 11px; color: #888; display: flex; align-items: center; gap: 6px; }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #555; transition: background .3s; }
+.sync-dot.ok { background: #2ecc71; }
+.sync-dot.err { background: #e74c3c; }
+.sync-dot.loading { background: #f39c12; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* MARKETPLACE SELECTOR */
+.mp-selector-wrap { display: flex; align-items: center; gap: 10px; }
+.mp-label { font-family: var(--mono); font-size: 11px; color: #888; letter-spacing: .04em; }
+.mp-select { font-family: var(--mono); font-size: 13px; font-weight: 500; background: #2a2926; color: #fff; border: 1px solid #444; border-radius: var(--radius); padding: 6px 12px; cursor: pointer; outline: none; }
+.mp-select:focus { border-color: var(--blue); }
+.mp-badge { font-family: var(--mono); font-size: 11px; background: #2a2926; color: #aaa; border: 1px solid #444; border-radius: var(--radius); padding: 4px 10px; }
+
+/* LAYOUT */
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+
+/* TABS */
+.tabs { display: flex; gap: 0; border-bottom: 1.5px solid var(--border); margin-bottom: 24px; }
+.tab { padding: 9px 20px; font-size: 13px; font-weight: 400; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: all .15s; font-family: var(--mono); letter-spacing: .02em; }
+.tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+.tab:hover:not(.active) { color: var(--text); }
+.panel { display: none; } .panel.active { display: block; }
+
+/* METRICS */
+.metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+.metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
+.metric-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 6px; }
+.metric-value { font-size: 26px; font-weight: 300; color: var(--text); font-family: var(--mono); }
+.metric-value.red { color: var(--red); }
+.metric-value.grn { color: var(--green); }
+.metric-value.amb { color: var(--amber); }
+
+/* TOOLBAR */
+.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.search-input { flex: 1; min-width: 200px; padding: 8px 12px; font-size: 13px; font-family: var(--mono); border: 1px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; }
+.search-input:focus { border-color: var(--blue); }
+.filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+.fbtn { font-size: 11px; font-family: var(--mono); padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; transition: all .12s; letter-spacing: .02em; }
+.fbtn:hover { border-color: var(--text2); color: var(--text); }
+.fbtn.active { background: var(--text); color: #fff; border-color: var(--text); }
+.export-btn { font-size: 12px; font-family: var(--mono); padding: 8px 14px; border-radius: var(--radius); border: 1px solid var(--border2); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap; }
+.export-btn:hover { background: var(--surface2); }
+.export-wrap { position: relative; }
+.export-menu { display: none; position: absolute; right: 0; top: calc(100% + 4px); background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); min-width: 200px; z-index: 50; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+.export-menu.open { display: block; }
+.export-option { padding: 10px 14px; font-size: 13px; font-family: var(--mono); cursor: pointer; color: var(--text); transition: background .1s; }
+.export-option:hover { background: var(--surface2); }
+
+/* TABLE */
+.tbl-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead th { background: var(--surface2); font-size: 10px; font-family: var(--mono); font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #fafaf7; }
+td { padding: 10px 14px; vertical-align: middle; }
+.asin-code { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--text); }
+.mp-tag { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+.prod-name { font-size: 12px; line-height: 1.45; word-break: break-word; max-width: 240px; }
+.prod-link { color: var(--blue); text-decoration: none; font-size: 12px; }
+.prod-link:hover { text-decoration: underline; }
+.prod-nolink { color: var(--text2); font-size: 12px; }
+.missing-hint { font-size: 11px; color: var(--red); margin-top: 3px; font-family: var(--mono); }
+
+/* DOTS */
+.dots-row { display: flex; gap: 3px; }
+.dot { width: 24px; height: 24px; border-radius: 4px; font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; font-family: var(--mono); }
+.d-ok { background: var(--green-bg); color: var(--green); }
+.d-no { background: var(--red-bg); color: var(--red); }
+.d-wip { background: var(--amber-bg); color: var(--amber); }
+.dots-labels { font-size: 9px; color: var(--text3); margin-top: 3px; font-family: var(--mono); letter-spacing: .02em; }
+
+/* SCORE */
+.score-num { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.score-bar { height: 4px; border-radius: 2px; background: var(--surface2); overflow: hidden; margin-top: 4px; width: 48px; }
+.score-fill { height: 100%; border-radius: 2px; }
+
+/* ACTION BUTTONS */
+.act-btn { font-size: 11px; font-family: var(--mono); padding: 4px 10px; border-radius: var(--radius); border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; margin-right: 4px; }
+.act-btn:hover { background: var(--surface2); color: var(--text); }
+.act-btn.del { color: var(--red); border-color: #f0b8b3; }
+.act-btn.del:hover { background: var(--red-bg); }
+
+/* FOOTER ROW */
+.footer-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 12px; font-family: var(--mono); color: var(--text3); }
+
+/* FORM */
+.form-wrap { max-width: 640px; }
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+.form-section-title { font-size: 11px; font-family: var(--mono); font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1/-1; }
+.form-group label { font-size: 11px; font-family: var(--mono); color: var(--text2); font-weight: 500; letter-spacing: .03em; }
+.form-group input, .form-group select, .form-group textarea { padding: 9px 11px; font-size: 13px; font-family: var(--mono); border: 1px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; width: 100%; transition: border-color .15s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); }
+.form-group textarea { resize: vertical; min-height: 72px; font-family: var(--sans); font-size: 13px; }
+.form-group input[readonly] { opacity: .5; cursor: not-allowed; }
+.field-error { font-size: 11px; color: var(--red); font-family: var(--mono); margin-top: 3px; display: none; }
+.field-error.show { display: block; }
+.input-error { border-color: var(--red) !important; background: var(--red-bg) !important; }
+.form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn-primary { padding: 10px 22px; font-size: 13px; font-family: var(--mono); border: none; background: var(--text); color: #fff; border-radius: var(--radius); cursor: pointer; font-weight: 500; letter-spacing: .02em; transition: opacity .15s; }
+.btn-primary:hover { opacity: .85; }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.btn-secondary { padding: 10px 18px; font-size: 13px; font-family: var(--mono); border: 1px solid var(--border2); background: transparent; color: var(--text); border-radius: var(--radius); cursor: pointer; }
+.btn-secondary:hover { background: var(--surface2); }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; align-items: flex-start; justify-content: center; padding-top: 60px; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-title { font-size: 14px; font-family: var(--mono); font-weight: 500; }
+.modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text2); line-height: 1; padding: 2px 6px; }
+.modal-close:hover { color: var(--text); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 11px 18px; border-radius: var(--radius); font-size: 13px; font-family: var(--mono); opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 200; }
+.toast.show { opacity: 1; }
+
+/* EMPTY */
+.empty-state { padding: 40px; text-align: center; color: var(--text3); font-family: var(--mono); font-size: 13px; }
+
+/* MP EMPTY */
+.mp-empty { background: var(--surface); border: 1px dashed var(--border2); border-radius: var(--radius-lg); padding: 48px; text-align: center; }
+.mp-empty-title { font-family: var(--mono); font-size: 14px; color: var(--text2); margin-bottom: 8px; }
+.mp-empty-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; }
+
+@media (max-width: 700px) {
+  .metrics { grid-template-columns: repeat(3, 1fr); }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-group.full { grid-column: 1; }
+  .container { padding: 16px 14px; }
+  .header { padding: 12px 16px; }
+  .mp-selector-wrap { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    ASIN MANAGER <span>multi-marketplace</span>
+  </div>
+  <div class="header-right">
+    <div class="mp-selector-wrap">
+      <span class="mp-label">marketplace</span>
+      <select class="mp-select" id="mp-selector" onchange="onMarketplaceChange()">
+        <option value="ES">🇪🇸 España (ES)</option>
+        <option value="IT">🇮🇹 Italia (IT)</option>
+        <option value="FR">🇫🇷 Francia (FR)</option>
+        <option value="GER">🇩🇪 Alemania (GER)</option>
+        <option value="BEL">🇧🇪 Bélgica (BEL)</option>
+        <option value="UK">🇬🇧 Reino Unido (UK)</option>
+      </select>
+    </div>
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">conectando...</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('dashboard')">dashboard</div>
+    <div class="tab" onclick="showTab('add')">+ agregar producto</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="panel active" id="tab-dashboard">
+    <div class="metrics" id="metrics"></div>
+    <div class="toolbar">
+      <input type="text" class="search-input" id="search" placeholder="buscar por ASIN o nombre..." oninput="renderTable()">
+      <div class="filter-group" id="filters"></div>
+      <div class="export-wrap" id="export-wrap">
+        <button class="export-btn" onclick="toggleExportMenu()">exportar pendientes ↓</button>
+        <div class="export-menu" id="export-menu">
+          <div class="export-option" onclick="exportFile('csv')">📄 CSV (Excel, Sheets)</div>
+          <div class="export-option" onclick="exportFile('xlsx')">📊 Excel (.xlsx)</div>
+        </div>
+      </div>
+      <button class="export-btn" onclick="downloadBackup()" title="Descargar backup JSON">⬇ backup</button>
+      <button class="export-btn" onclick="triggerImport()" title="Restaurar desde backup">⬆ restaurar</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+    </div>
+    <div id="dashboard-content"></div>
+    <div class="footer-row">
+      <span id="footer-count"></span>
+      <span id="last-sync-time"></span>
+    </div>
+  </div>
+
+  <!-- ADD -->
+  <div class="panel" id="tab-add">
+    <div class="form-wrap">
+      <div class="form-card">
+        <div class="form-section-title" id="form-section-title">nuevo producto</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>ASIN *</label>
+            <input type="text" id="f-asin" placeholder="ej. B0F9FY7PYN" maxlength="12" oninput="onAsinInput(this)">
+            <span class="field-error" id="asin-error"></span>
+          </div>
+          <div class="form-group">
+            <label>Marketplace</label>
+            <select id="f-mp" onchange="onMpChange(this)">
+              <option>ES</option><option>IT</option><option>FR</option>
+              <option>GER</option><option>BEL</option><option>UK</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Nombre del producto *</label>
+            <textarea id="f-prod" placeholder="Nombre completo tal como aparece en Amazon"></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Link del producto (Amazon)</label>
+            <input type="text" id="f-link" placeholder="https://www.amazon.es/dp/...">
+          </div>
+          <div class="form-group">
+            <label>Imágenes</label>
+            <select id="f-img"><option>OK</option><option>NO</option><option>En proceso</option></select>
+          </div>
+          <div class="form-group">
+            <label>Contenido A+</label>
+            <select id="f-aplus"><option>NO</option><option>OK</option><option>En proceso</option></select>
+          </div>
+          <div class="form-group">
+            <label>Título</label>
+            <select id="f-titulo"><option>OK</option><option>NO</option><option>En proceso</option></select>
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <select id="f-desc"><option>OK</option><option>NO</option><option>En proceso</option></select>
+          </div>
+          <div class="form-group">
+            <label>Bullet Points</label>
+            <select id="f-bullets"><option>OK</option><option>NO</option><option>En proceso</option></select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" id="save-btn" onclick="saveProduct()">guardar producto</button>
+          <button class="btn-secondary" onclick="clearForm()">limpiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">editar producto</div>
+      <button class="modal-close" onclick="closeEdit()">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>ASIN</label>
+        <input type="text" id="e-asin" readonly>
+      </div>
+      <div class="form-group">
+        <label>Marketplace</label>
+        <select id="e-mp"><option>ES</option><option>IT</option><option>FR</option><option>GER</option><option>BEL</option><option>UK</option></select>
+      </div>
+      <div class="form-group full">
+        <label>Nombre del producto</label>
+        <textarea id="e-prod"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Link del producto (Amazon)</label>
+        <input type="text" id="e-link" placeholder="https://www.amazon.es/dp/...">
+      </div>
+      <div class="form-group">
+        <label>Imágenes</label>
+        <select id="e-img"><option>OK</option><option>NO</option><option>En proceso</option></select>
+      </div>
+      <div class="form-group">
+        <label>Contenido A+</label>
+        <select id="e-aplus"><option>NO</option><option>OK</option><option>En proceso</option></select>
+      </div>
+      <div class="form-group">
+        <label>Título</label>
+        <select id="e-titulo"><option>OK</option><option>NO</option><option>En proceso</option></select>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <select id="e-desc"><option>OK</option><option>NO</option><option>En proceso</option></select>
+      </div>
+      <div class="form-group">
+        <label>Bullet Points</label>
+        <select id="e-bullets"><option>OK</option><option>NO</option><option>En proceso</option></select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="applyEdit()">guardar cambios</button>
+      <button class="btn-secondary" onclick="closeEdit()">cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  ASIN MANAGER — Google Sheets Edition
+//  Reemplaza SCRIPT_URL con la URL de tu Apps Script
+// ============================================================
+const SCRIPT_URL   = "https://script.google.com/macros/s/AKfycbyrW7EK4rFAQNy9uurnAE70RL1d6ZxYgLSuk5GKeMhTl-Tykn29t02qMKJWgUS_Hjk/exec";
+const MARKETPLACES = ["ES","IT","FR","GER","BEL","UK"];
+const FIELDS       = ["img","aplus","titulo","desc","bullets"];
+const FLABELS      = ["Img","A+","Tít","Desc","Blts"];
+const FNAME        = {img:"Imágenes",aplus:"Contenido A+",titulo:"Título",desc:"Descripción",bullets:"Bullet Points"};
+const MP_DOMAINS   = {ES:"amazon.es",IT:"amazon.it",FR:"amazon.fr",GER:"amazon.de",BEL:"amazon.com.be",UK:"amazon.co.uk"};
+
+const INITIAL_ES = [
+  {id:"1",asin:"B0F9FY7PYN",mp:"ES",img:"OK",aplus:"En proceso",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0F9FY7PYN",producto:"PimPam Factory Patucos Desechables - Pack 100 - Azul"},
+  {id:"2",asin:"B088KL1HQ7",mp:"ES",img:"OK",aplus:"En proceso",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B088KL1HQ7",producto:"PimPam Factory Patucos Desechables - Pack 1000 - Blanco"},
+  {id:"3",asin:"B088C1VQHS",mp:"ES",img:"OK",aplus:"En proceso",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B088C1VQHS",producto:"PimPam Factory Patucos Desechables - Pack 200 - Blanco"},
+  {id:"4",asin:"B088C216C6",mp:"ES",img:"OK",aplus:"En proceso",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B088C216C6",producto:"PimPam Factory Patucos Desechables - Pack 300 - Blanco"},
+  {id:"5",asin:"B088C1DFCJ",mp:"ES",img:"OK",aplus:"En proceso",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B088C1DFCJ",producto:"PimPam Factory Patucos Desechables - Pack 100 - Blanco"},
+  {id:"6",asin:"B0GSH296R5",mp:"ES",img:"NO",aplus:"NO",titulo:"En proceso",desc:"NO",bullets:"NO",link:"https://www.amazon.es/dp/B0GSH296R5",producto:"XARA Organizador bajo Fregadero - Pack 2"},
+  {id:"7",asin:"B0GSG14YLT",mp:"ES",img:"NO",aplus:"NO",titulo:"En proceso",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0GSG14YLT",producto:"Organizador Bajo Fregadero para Cocina o Baño"},
+  {id:"8",asin:"B0G4S8XQRH",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0G4S8XQRH",producto:"PimPam Factory Empapadores 160x90 (Pack 2) Sin Alas"},
+  {id:"9",asin:"B0G4SDM2RL",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0G4SDM2RL",producto:"PimPam Factory Empapadores 160x90 (Pack 4) Sin Alas"},
+  {id:"10",asin:"B0G4SCRG89",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0G4SCRG89",producto:"PimPam Factory Empapadores 75x90 Sin Alas"},
+  {id:"11",asin:"B0GN9YDP7Z",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0GN9YDP7Z",producto:"PimPam Factory Patucos Desechables - Pack 100 - Azul v2"},
+  {id:"12",asin:"B0GKHPHWKL",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0GKHPHWKL",producto:"PimPam Factory Empapadores 50x70 Sin Alas"},
+  {id:"13",asin:"B0G4SF4NR5",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0G4SF4NR5",producto:"PimPam Factory Empapadores 50x70 (Pack 2) Sin Alas"},
+  {id:"14",asin:"B0G4SDKNNW",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0G4SDKNNW",producto:"PimPam Factory Empapadores 135x90 Sin Alas"},
+  {id:"15",asin:"B0G4SBMLKK",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0G4SBMLKK",producto:"PimPam Factory Empapadores 135x90 (Pack 4) Sin Alas"},
+  {id:"16",asin:"B083V6PH9W",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B083V6PH9W",producto:"PimPam Factory Empapadores 90x85 (Pack 2) con Alas"},
+  {id:"17",asin:"B092W79MFN",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B092W79MFN",producto:"PimPam Factory Empapadores 160x85 (Pack 2) con Alas"},
+  {id:"18",asin:"B08NF83KGW",mp:"ES",img:"OK",aplus:"OK",titulo:"En proceso",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B08NF83KGW",producto:"PimPam Factory Empapadores 135x85 (Pack 2) con Alas"},
+  {id:"19",asin:"B085TQ7FWB",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B085TQ7FWB",producto:"PimPam Factory Empapadores 90x85 con Alas"},
+  {id:"20",asin:"B08NF98SWP",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B08NF98SWP",producto:"PimPam Factory Empapadores 135x85 con Alas"},
+  {id:"21",asin:"B092W67H6S",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B092W67H6S",producto:"PimPam Factory Empapadores 160x85 con Alas"},
+  {id:"22",asin:"B09FTJYVZG",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B09FTJYVZG",producto:"PimPam Factory Empapadores 200x85 con Alas"},
+  {id:"23",asin:"B09FTGPT59",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B09FTGPT59",producto:"PimPam Factory Empapadores 50x70 Sin Alas B"},
+  {id:"24",asin:"B0FX3B8TB4",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0FX3B8TB4",producto:"XARA Guantes Polietileno Pack 1.000"},
+  {id:"25",asin:"B0C5JX299Q",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0C5JX299Q",producto:"XARA Guantes Polietileno Pack 10.000"},
+  {id:"26",asin:"B0FKZ6J4SW",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0FKZ6J4SW",producto:"XARA Bata Quirurgica XL Pack 10 - 25gr"},
+  {id:"27",asin:"B0F8P75H96",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0F8P75H96",producto:"XARA Pack 400 Gorros + Cubrezapatos + Batas + Guantes"},
+  {id:"28",asin:"B0C29CBVCQ",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0C29CBVCQ",producto:"XARA Bata Quirurgica XL Pack 10 - 25gr (B)"},
+  {id:"29",asin:"B0C28Y1SYF",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0C28Y1SYF",producto:"XARA Bata Quirurgica XL Pack 50 - 25gr"},
+  {id:"30",asin:"B0FKZ7555V",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0FKZ7555V",producto:"XARA Bata Quirurgica L Pack 10 - 35gr"},
+  {id:"31",asin:"B0FQ5M67T4",mp:"ES",img:"OK",aplus:"NO",titulo:"OK",desc:"OK",bullets:"OK",link:"https://www.amazon.es/dp/B0FQ5M67T4",producto:"XARA Bata Quirurgica XXXL Pack 10 - 35gr"},
+  {id:"32",asin:"B0C28YX2CD",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0C28YX2CD",producto:"XARA Bata Quirurgica L Pack 50 - 35gr"},
+  {id:"33",asin:"B0C28WLD9P",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0C28WLD9P",producto:"XARA Bata Quirurgica L Pack 10 - 35gr (B)"},
+  {id:"34",asin:"B0C28YGVSJ",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0C28YGVSJ",producto:"XARA Bata Quirurgica XXXL Pack 50 - 35gr"},
+  {id:"35",asin:"B0C28XQDGP",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0C28XQDGP",producto:"XARA Bata Quirurgica XL Pack 10 - 35gr"},
+  {id:"36",asin:"B0C28XH3BD",mp:"ES",img:"OK",aplus:"OK",titulo:"OK",desc:"NO",bullets:"OK",link:"https://www.amazon.es/dp/B0C28XH3BD",producto:"XARA Bata Quirurgica XL Pack 50 - 35gr"},
+];
+
+let ALL_DATA  = {ES:[],IT:[],FR:[],GER:[],BEL:[],UK:[]};
+let nextIds   = {ES:100,IT:100,FR:100,GER:100,BEL:100,UK:100};
+let currentMP = "ES";
+let activeFilter = "all";
+let editIndex = -1;
+
+// ── localStorage ─────────────────────────────────────────────
+const LS_KEY = "asin_manager_v2";
+function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify({all_data:ALL_DATA,nextIds}));}catch(e){}}
+function loadLocal(){try{const r=localStorage.getItem(LS_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+
+// ── Sync UI ──────────────────────────────────────────────────
+function setSyncStatus(state,label){
+  document.getElementById("sync-dot").className="sync-dot "+state;
+  document.getElementById("sync-label").textContent=label;
+}
+function updateLastSync(){
+  const el=document.getElementById("last-sync-time");
+  if(el) el.textContent="última sync: "+new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+}
+
+// ── API ──────────────────────────────────────────────────────
+async function apiGet(params){
+  const qs=new URLSearchParams({...params,_t:Date.now()}).toString();
+  const r=await fetch(SCRIPT_URL+"?"+qs, {redirect:"follow"});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function apiPost(body){
+  // Apps Script requiere text/plain para evitar preflight CORS
+  // y redirect:follow para manejar el redirect 302 que hace Google
+  const r=await fetch(SCRIPT_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(body),
+    redirect:"follow"
+  });
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}
+
+// ── Load ─────────────────────────────────────────────────────
+async function loadFromCloud(isAutoSync){
+  setSyncStatus("loading","cargando...");
+  try{
+    if(SCRIPT_URL==="REEMPLAZAR_CON_TU_URL") throw new Error("no configurado");
+    const res=await apiGet({action:"getAll"});
+    if(!res.ok) throw new Error(res.error||"error");
+    MARKETPLACES.forEach(mp=>{if(!res.data[mp]) res.data[mp]=[];});
+    ALL_DATA=res.data;
+    MARKETPLACES.forEach(mp=>{
+      const ids=(ALL_DATA[mp]||[]).map(d=>parseInt(d.id)||0);
+      nextIds[mp]=ids.length>0?Math.max(...ids)+1:100;
+    });
+    saveLocal();
+    setSyncStatus("ok","sincronizado");
+    updateLastSync();
+  }catch(e){
+    setSyncStatus("err","sin conexión");
+    const local=loadLocal();
+    if(local){ALL_DATA=local.all_data;nextIds=local.nextIds||nextIds;toast("Usando datos locales.");}
+    else{ALL_DATA.ES=INITIAL_ES.map(d=>({...d}));toast("Sin conexión. Datos de ejemplo.");}
+  }
+  refresh();
+}
+
+// ── Save product ─────────────────────────────────────────────
+async function saveProduct(){
+  const asin=document.getElementById("f-asin").value.trim().toUpperCase();
+  const prod=document.getElementById("f-prod").value.trim();
+  const link=document.getElementById("f-link").value.trim();
+  const mp=document.getElementById("f-mp").value;
+  const errEl=document.getElementById("asin-error");
+  if(!asin||!prod){toast("ASIN y nombre son obligatorios");return;}
+  if(!/^[A-Z0-9]{10}$/.test(asin)){
+    errEl.textContent="Formato inválido — solo letras y números, exactamente 10 caracteres.";
+    errEl.classList.add("show");document.getElementById("f-asin").classList.add("input-error");return;
+  }
+  const dupInMP=(ALL_DATA[mp]||[]).some(d=>d.asin===asin);
+  if(dupInMP){
+    errEl.textContent="ASIN duplicado — ya existe en "+mp+".";
+    errEl.classList.add("show");document.getElementById("f-asin").classList.add("input-error");return;
+  }
+  const btn=document.getElementById("save-btn");
+  btn.disabled=true;btn.textContent="guardando...";
+  const entry={id:String(nextIds[mp]++),asin,mp,
+    img:document.getElementById("f-img").value,
+    aplus:document.getElementById("f-aplus").value,
+    titulo:document.getElementById("f-titulo").value,
+    desc:document.getElementById("f-desc").value,
+    bullets:document.getElementById("f-bullets").value,
+    link,producto:prod};
+  if(!ALL_DATA[mp]) ALL_DATA[mp]=[];
+  ALL_DATA[mp].push(entry);
+  saveLocal();
+  currentMP=mp;
+  document.getElementById("mp-selector").value=mp;
+  refresh();clearForm();
+  btn.disabled=false;btn.textContent="guardar producto";
+  toast("Guardado localmente \u2713 \u2014 sincronizando...");
+  showTab("dashboard");
+  try{
+    const res=await apiPost({action:"add",mp,entry});
+    if(res.ok){setSyncStatus("ok","guardado \u2713");updateLastSync();toast("Guardado en Sheets \u2713");}
+    else throw new Error(res.error);
+  }catch(e){
+    setSyncStatus("err","local ok \u00b7 sin nube");
+    setTimeout(async()=>{try{const r=await apiPost({action:"add",mp,entry});if(r.ok){setSyncStatus("ok","sincronizado \u2713");updateLastSync();}}catch(_){}},5000);
+  }
+}
+
+// ── Edit ─────────────────────────────────────────────────────
+function openEdit(idx){
+  editIndex=idx;
+  const d=ALL_DATA[currentMP][idx];
+  document.getElementById("e-asin").value=d.asin;
+  document.getElementById("e-mp").value=d.mp||currentMP;
+  document.getElementById("e-prod").value=d.producto;
+  document.getElementById("e-link").value=d.link||"";
+  document.getElementById("e-img").value=d.img;
+  document.getElementById("e-aplus").value=d.aplus;
+  document.getElementById("e-titulo").value=d.titulo;
+  document.getElementById("e-desc").value=d.desc;
+  document.getElementById("e-bullets").value=d.bullets;
+  document.getElementById("edit-modal").classList.add("open");
+}
+function closeEdit(){document.getElementById("edit-modal").classList.remove("open");editIndex=-1;}
+async function applyEdit(){
+  if(editIndex<0) return;
+  const updated={...ALL_DATA[currentMP][editIndex],
+    mp:document.getElementById("e-mp").value,
+    producto:document.getElementById("e-prod").value,
+    link:document.getElementById("e-link").value.trim(),
+    img:document.getElementById("e-img").value,
+    aplus:document.getElementById("e-aplus").value,
+    titulo:document.getElementById("e-titulo").value,
+    desc:document.getElementById("e-desc").value,
+    bullets:document.getElementById("e-bullets").value};
+  ALL_DATA[currentMP][editIndex]=updated;
+  saveLocal();refresh();closeEdit();
+  toast("Guardado localmente \u2713");
+  try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado \u2713");updateLastSync();}}
+  catch(e){setSyncStatus("err","local ok \u00b7 sin nube");}
+}
+
+// ── Delete ───────────────────────────────────────────────────
+async function deleteProduct(idx){
+  if(!confirm("\u00bfEliminar este producto?")) return;
+  const asin=ALL_DATA[currentMP][idx].asin;
+  ALL_DATA[currentMP].splice(idx,1);
+  saveLocal();refresh();toast("Eliminado localmente \u2713");
+  try{const res=await apiPost({action:"delete",mp:currentMP,asin});if(res.ok){setSyncStatus("ok","guardado \u2713");updateLastSync();}}
+  catch(e){setSyncStatus("err","local ok \u00b7 sin nube");}
+}
+
+// ── Backup / Restore ─────────────────────────────────────────
+function downloadBackup(){
+  const data=JSON.stringify({all_data:ALL_DATA,nextIds,exported:new Date().toISOString()},null,2);
+  const blob=new Blob([data],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="asin_backup_"+new Date().toISOString().slice(0,10)+".json";
+  a.click();
+  toast("Backup descargado \u2713");
+}
+function triggerImport(){document.getElementById("import-file").click();}
+async function handleImport(e){
+  const file=e.target.files[0];if(!file) return;
+  try{
+    const text=await file.text();
+    const parsed=JSON.parse(text);
+    if(!parsed.all_data){toast("Archivo inv\u00e1lido");return;}
+    if(!confirm("\u00bfRestaurar datos desde este backup? Se sobreescribir\u00e1n los datos actuales.")) return;
+    ALL_DATA=parsed.all_data;nextIds=parsed.nextIds||nextIds;
+    saveLocal();refresh();toast("Restaurado localmente \u2713 \u2014 sincronizando...");
+    try{const res=await apiPost({action:"bulkImport",data:ALL_DATA});if(res.ok){setSyncStatus("ok","sincronizado \u2713");updateLastSync();toast("Restaurado en Sheets \u2713");}}
+    catch(e2){setSyncStatus("err","local ok \u00b7 Sheets pendiente");}
+  }catch(e){toast("Error al leer el archivo");}
+  e.target.value="";
+}
+
+// ── UI helpers ───────────────────────────────────────────────
+function currentData(){return ALL_DATA[currentMP]||[];}
+function score(d){return FIELDS.reduce((s,f)=>s+(d[f]==="OK"?1:0),0);}
+function scoreColor(s){return s===5?"#1a7a3c":s>=3?"#a05c00":"#c0392b";}
+function dotClass(v){return v==="OK"?"d-ok":v==="NO"?"d-no":"d-wip";}
+function dotLabel(v){return v==="OK"?"\u2713":v==="NO"?"\u2717":"\u2026";}
+
+function showTab(t){
+  document.querySelectorAll(".tab").forEach((el,i)=>el.classList.toggle("active",["dashboard","add"][i]===t));
+  document.querySelectorAll(".panel").forEach((el,i)=>el.classList.toggle("active",["tab-dashboard","tab-add"][i]==="tab-"+t));
+  if(t==="add") clearForm();
+}
+function setFilter(f){
+  activeFilter=f;
+  document.querySelectorAll(".fbtn").forEach(b=>b.classList.toggle("active",b.dataset.f===f));
+  renderTable();
+}
+function getFiltered(){
+  const data=currentData();
+  const q=(document.getElementById("search")||{value:""}).value.toLowerCase().trim();
+  return data.filter(d=>{
+    const mq=!q||d.asin.toLowerCase().includes(q)||d.producto.toLowerCase().includes(q);
+    if(!mq) return false;
+    if(activeFilter==="all") return true;
+    if(activeFilter==="pending") return FIELDS.some(f=>d[f]!=="OK");
+    if(activeFilter==="complete") return score(d)===5;
+    return d[activeFilter]!=="OK";
+  });
+}
+function onMarketplaceChange(){
+  currentMP=document.getElementById("mp-selector").value;
+  activeFilter="all";
+  document.getElementById("f-mp").value=currentMP;
+  refresh();
+}
+function onMpChange(el){
+  const asin=document.getElementById("f-asin").value.trim();
+  const linkEl=document.getElementById("f-link");
+  if(asin.length===10&&/^[A-Z0-9]{10}$/.test(asin)&&linkEl.dataset.autofilled==="true")
+    linkEl.value="https://www."+(MP_DOMAINS[el.value]||"amazon.es")+"/dp/"+asin;
+}
+function onAsinInput(el){
+  el.value=el.value.toUpperCase();
+  const asin=el.value.trim(),mp=document.getElementById("f-mp").value;
+  const linkEl=document.getElementById("f-link"),errEl=document.getElementById("asin-error");
+  if(asin.length===10&&/^[A-Z0-9]{10}$/.test(asin)){
+    if(!linkEl.value||linkEl.dataset.autofilled==="true"){
+      linkEl.value="https://www."+(MP_DOMAINS[mp]||"amazon.es")+"/dp/"+asin;
+      linkEl.dataset.autofilled="true";
+    }
+  }else{if(linkEl.dataset.autofilled==="true"){linkEl.value="";linkEl.dataset.autofilled="false";}}
+  if(asin.length<10){errEl.textContent="";errEl.classList.remove("show");el.classList.remove("input-error");return;}
+  if(!/^[A-Z0-9]{10}$/.test(asin)){
+    errEl.textContent="Formato inv\u00e1lido \u2014 solo letras y n\u00fameros, exactamente 10 caracteres.";
+    errEl.classList.add("show");el.classList.add("input-error");return;
+  }
+  const curMp=document.getElementById("f-mp").value;
+  const dupInMP=(ALL_DATA[curMp]||[]).some(d=>d.asin===asin);
+  if(dupInMP){
+    errEl.textContent="ASIN duplicado \u2014 ya existe en "+curMp+".";
+    errEl.classList.add("show");el.classList.add("input-error");return;
+  }
+  errEl.textContent="";errEl.classList.remove("show");el.classList.remove("input-error");
+}
+function clearForm(){
+  const errEl=document.getElementById("asin-error");
+  if(errEl){errEl.textContent="";errEl.classList.remove("show");}
+  const ai=document.getElementById("f-asin");if(ai) ai.classList.remove("input-error");
+  document.getElementById("f-asin").value="";
+  document.getElementById("f-prod").value="";
+  document.getElementById("f-link").value="";
+  document.getElementById("f-link").dataset.autofilled="false";
+  document.getElementById("f-mp").value=currentMP;
+  document.getElementById("f-img").value="OK";
+  document.getElementById("f-aplus").value="NO";
+  document.getElementById("f-titulo").value="OK";
+  document.getElementById("f-desc").value="OK";
+  document.getElementById("f-bullets").value="OK";
+}
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),3000);
+}
+
+// ── Render ───────────────────────────────────────────────────
+function renderMetrics(){
+  const data=currentData();
+  const t=data.length,comp=data.filter(d=>score(d)===5).length;
+  const pend=data.filter(d=>score(d)<5).length;
+  const naplus=data.filter(d=>d.aplus!=="OK").length;
+  const ndesc=data.filter(d=>d.desc!=="OK").length;
+  document.getElementById("metrics").innerHTML=
+    '<div class="metric"><div class="metric-label">Total \u00b7 '+currentMP+'</div><div class="metric-value">'+t+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Completos</div><div class="metric-value grn">'+comp+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Pendientes</div><div class="metric-value red">'+pend+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Sin A+</div><div class="metric-value amb">'+naplus+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Sin Descripci\u00f3n</div><div class="metric-value amb">'+ndesc+'</div></div>';
+}
+function renderFilters(){
+  const data=currentData();
+  const counts={all:data.length,
+    pending:data.filter(d=>FIELDS.some(f=>d[f]!=="OK")).length,
+    complete:data.filter(d=>score(d)===5).length,
+    aplus:data.filter(d=>d.aplus!=="OK").length,
+    desc:data.filter(d=>d.desc!=="OK").length};
+  const labels={all:"todos",pending:"pendientes",complete:"completos",aplus:"sin A+",desc:"sin descripci\u00f3n"};
+  document.getElementById("filters").innerHTML=Object.entries(labels).map(([f,l])=>
+    '<button class="fbtn '+(f===activeFilter?"active":"")+'" data-f="'+f+'" onclick="setFilter(\''+f+'\')">'+l+' <span style="opacity:.55">'+counts[f]+'</span></button>'
+  ).join("");
+}
+function renderTable(){
+  const data=currentData();
+  const content=document.getElementById("dashboard-content");
+  if(data.length===0){
+    content.innerHTML='<div class="mp-empty"><div class="mp-empty-title">Sin productos en '+currentMP+'</div><div class="mp-empty-sub">Este marketplace todav\u00eda no tiene productos cargados.</div><button class="btn-primary" onclick="showTab(\'add\')">+ agregar primer producto</button></div>';
+    document.getElementById("footer-count").textContent="";return;
+  }
+  const rows=getFiltered();
+  let tbody=rows.length===0?'<tr><td colspan="5" class="empty-state">sin resultados</td></tr>':
+    rows.map(d=>{
+      const s=score(d),pct=Math.round(s/5*100);
+      const missing=FIELDS.filter(f=>d[f]!=="OK").map(f=>FNAME[f]);
+      const idx=ALL_DATA[currentMP].indexOf(d);
+      const nameHTML=d.link
+        ?'<a href="'+d.link+'" target="_blank" rel="noopener" class="prod-link">'+d.producto+'</a>'
+        :'<span class="prod-nolink">'+d.producto+'</span>';
+      return '<tr><td><div class="asin-code">'+d.asin+'</div><div class="mp-tag">'+(d.mp||currentMP)+'</div></td>'+
+        '<td><div class="prod-name">'+nameHTML+(missing.length?'<div class="missing-hint">'+missing.join(", ")+'</div>':'')+'</div></td>'+
+        '<td><div class="dots-row">'+FIELDS.map((f,i)=>'<div class="dot '+dotClass(d[f])+'" title="'+FLABELS[i]+': '+d[f]+'">'+dotLabel(d[f])+'</div>').join("")+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
+        '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
+        '<td><button class="act-btn" onclick="openEdit('+idx+')">editar</button><button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button></td></tr>';
+    }).join("");
+  content.innerHTML='<div class="tbl-wrap"><table><thead><tr><th style="width:120px">ASIN</th><th>Producto</th><th style="width:190px">Img \u00b7 A+ \u00b7 T\u00edt \u00b7 Desc \u00b7 Blts</th><th style="width:80px">Score</th><th style="width:120px">Acciones</th></tr></thead><tbody>'+tbody+'</tbody></table></div>';
+  document.getElementById("footer-count").textContent=rows.length+" de "+data.length+" productos \u00b7 "+currentMP;
+}
+function refresh(){renderMetrics();renderFilters();renderTable();}
+
+// ── Export ───────────────────────────────────────────────────
+function toggleExportMenu(){document.getElementById("export-menu").classList.toggle("open");}
+function exportFile(format){
+  document.getElementById("export-menu").classList.remove("open");
+  const data=currentData();
+  const pending=data.filter(d=>FIELDS.some(f=>d[f]!=="OK"));
+  if(!pending.length){toast("No hay pendientes para exportar");return;}
+  const headers=["ASIN","Marketplace","Producto","Link","Im\u00e1genes","Contenido A+","T\u00edtulo","Descripci\u00f3n","Bullet Points","Campos pendientes","Score"];
+  const rows=pending.map(d=>{
+    const miss=FIELDS.filter(f=>d[f]!=="OK").map(f=>FNAME[f]).join(", ");
+    return [d.asin,d.mp||currentMP,d.producto,d.link||"",d.img,d.aplus,d.titulo,d.desc,d.bullets,miss,score(d)+"/5"];
+  });
+  if(format==="csv"){
+    const esc=v=>'"'+String(v).replace(/"/g,'""')+'"';
+    const lines=[headers.map(esc).join(","),...rows.map(r=>r.map(esc).join(","))];
+    const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/csv;charset=utf-8;"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+    a.download="pendientes_"+currentMP+".csv";a.click();
+  }else{
+    const run=()=>{
+      const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+      ws["!cols"]=[12,10,40,30,10,10,10,12,12,30,8].map(w=>({wch:w}));
+      const wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,"Pendientes "+currentMP);
+      XLSX.writeFile(wb,"pendientes_"+currentMP+".xlsx");
+    };
+    if(typeof XLSX!=="undefined") run();
+    else{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=run;document.head.appendChild(s);}
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────
+document.addEventListener("click",function(e){
+  const wrap=document.getElementById("export-wrap");
+  if(wrap&&!wrap.contains(e.target)) document.getElementById("export-menu").classList.remove("open");
+});
+document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target===this) closeEdit();});
+
+loadFromCloud();
+setInterval(()=>loadFromCloud(true),120000);
+</script>
+</body>
+</html>
