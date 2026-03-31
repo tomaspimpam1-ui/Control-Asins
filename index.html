@@ -114,10 +114,13 @@ td { padding: 10px 14px; vertical-align: middle; }
 .dots-labels { font-size: 9px; color: var(--text3); margin-top: 3px; font-family: var(--mono); letter-spacing: .02em; }
 
 /* INLINE FIELD DROPDOWN */
-.field-dropdown { position: fixed; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); box-shadow: 0 6px 18px rgba(0,0,0,.12); z-index: 300; min-width: 130px; overflow: hidden; }
-.field-dropdown-item { padding: 9px 14px; font-size: 12px; font-family: var(--mono); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .1s; color: var(--text); }
+.field-dropdown { position: fixed; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); box-shadow: 0 8px 24px rgba(0,0,0,.13); z-index: 300; min-width: 145px; overflow: hidden; animation: ddFadeIn .12s ease; }
+@keyframes ddFadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.field-dropdown-label { padding: 8px 14px 4px; font-size: 10px; font-family: var(--mono); color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+.field-dropdown-item { padding: 8px 14px; font-size: 12px; font-family: var(--mono); cursor: pointer; display: flex; align-items: center; gap: 9px; transition: background .1s; color: var(--text); }
 .field-dropdown-item:hover { background: var(--surface2); }
-.field-dropdown-item .di-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.field-dropdown-item:last-child { padding-bottom: 10px; }
+.field-dropdown-item .di-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
 .di-ok { background: var(--green); }
 .di-no { background: var(--red); }
 .di-wip { background: var(--amber); }
@@ -391,6 +394,7 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
 
 <div class="toast" id="toast"></div>
 <div class="field-dropdown" id="field-dropdown" style="display:none">
+  <div class="field-dropdown-label">cambiar estado</div>
   <div class="field-dropdown-item" onclick="applyFieldValue('OK')"><span class="di-dot di-ok"></span>OK</div>
   <div class="field-dropdown-item" onclick="applyFieldValue('En proceso')"><span class="di-dot di-wip"></span>En proceso</div>
   <div class="field-dropdown-item" onclick="applyFieldValue('NO')"><span class="di-dot di-no"></span>NO</div>
@@ -769,46 +773,47 @@ function renderTable(){
   const content=document.getElementById("dashboard-content");
   if(data.length===0){
     content.innerHTML='<div class="mp-empty"><div class="mp-empty-title">Sin productos en '+currentMP+'</div><div class="mp-empty-sub">Este marketplace todav\u00eda no tiene productos cargados.</div><button class="btn-primary" onclick="showTab(\'add\')">+ agregar primer producto</button></div>';
-    document.getElementById("footer-count").textContent="";return;
+    document.getElementById("footer-count").textContent="";
+    document.getElementById("pagination").innerHTML="";
+    return;
   }
   const rows=getFiltered();
-  let tbody=rows.length===0?'<tr><td colspan="5" class="empty-state">sin resultados</td></tr>':
-    rows.map(d=>{
+  const totalPages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));
+  if(currentPage>totalPages) currentPage=totalPages;
+  const pageRows=rows.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  const tbody=pageRows.length===0?'<tr><td colspan="5" class="empty-state">sin resultados</td></tr>':
+    pageRows.map(d=>{
       const s=score(d),pct=Math.round(s/5*100);
-      const missing=FIELDS.filter(f=>d[f]!=="OK").map(f=>FNAME[f]);
-      const idx=ALL_DATA[currentMP].indexOf(d);
+      const asin=d.asin;
+      const idx=ALL_DATA[currentMP].findIndex(x=>x.asin===asin);
       const nameHTML=d.link
         ?'<a href="'+d.link+'" target="_blank" rel="noopener" class="prod-link">'+d.producto+'</a>'
         :'<span class="prod-nolink">'+d.producto+'</span>';
-      return '<tr><td><div class="asin-code">'+d.asin+'</div><div class="mp-tag">'+(d.mp||currentMP)+'</div></td>'+
-        '<td><div class="prod-name">'+nameHTML+(()=>{const nos=FIELDS.filter(f=>d[f]==="NO").map(f=>FNAME[f]);const wips=FIELDS.filter(f=>d[f]==="En proceso").map(f=>FNAME[f]);return(nos.length?'<div class="missing-hint">\u2717 '+nos.join(", ")+'</div>':'')+(wips.length?'<div class="wip-hint">\u2026 '+wips.join(", ")+'</div>':'');})()+'</div></td>'+
-        '<td><div class="dots-row">'+FIELDS.map((f,i)=>'<div class="dot '+dotClass(d[f])+'" title="'+FLABELS[i]+': '+d[f]+'" onclick="openFieldDropdown(event,'+idx+',\''+f+'\')">'+dotLabel(d[f])+'</div>').join("")+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
+      const hints=(()=>{
+        const nos=FIELDS.filter(f=>d[f]==="NO").map(f=>FNAME[f]);
+        const wips=FIELDS.filter(f=>d[f]==="En proceso").map(f=>FNAME[f]);
+        return (nos.length?'<div class="missing-hint">\u2717 '+nos.join(", ")+'</div>':'')+
+               (wips.length?'<div class="wip-hint">\u2026 '+wips.join(", ")+'</div>':'');
+      })();
+      const dots=FIELDS.map((f,i)=>
+        '<div class="dot '+dotClass(d[f])+'" title="'+FLABELS[i]+': '+d[f]+'" data-asin="'+asin+'" data-field="'+f+'" onclick="openFieldDropdown(event,this)">'+dotLabel(d[f])+'</div>'
+      ).join("");
+      return '<tr>'+
+        '<td><div class="asin-code">'+asin+'</div><div class="mp-tag">'+(d.mp||currentMP)+'</div></td>'+
+        '<td><div class="prod-name">'+nameHTML+hints+'</div></td>'+
+        '<td><div class="dots-row">'+dots+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
         '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
-        '<td><button class="act-btn" onclick="openEdit('+idx+')">editar</button><button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button></td></tr>';
-    }).join("");
-  // Pagination
-  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-  if (currentPage > totalPages) currentPage = totalPages;
-  const pageRows = rows.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
-
-  // Re-render tbody with only current page rows
-  tbody = pageRows.length === 0 ? '<tr><td colspan="5" class="empty-state">sin resultados</td></tr>' :
-    pageRows.map(d => {
-      const s=score(d),pct=Math.round(s/5*100);
-      const idx=ALL_DATA[currentMP].indexOf(d);
-      const nameHTML=d.link
-        ?'<a href="'+d.link+'" target="_blank" rel="noopener" class="prod-link">'+d.producto+'</a>'
-        :'<span class="prod-nolink">'+d.producto+'</span>';
-      return '<tr><td><div class="asin-code">'+d.asin+'</div><div class="mp-tag">'+(d.mp||currentMP)+'</div></td>'+
-        '<td><div class="prod-name">'+nameHTML+(()=>{const nos=FIELDS.filter(f=>d[f]==="NO").map(f=>FNAME[f]);const wips=FIELDS.filter(f=>d[f]==="En proceso").map(f=>FNAME[f]);return(nos.length?'<div class="missing-hint">\u2717 '+nos.join(", ")+'</div>':'')+(wips.length?'<div class="wip-hint">\u2026 '+wips.join(", ")+'</div>':'');})()+'</div></td>'+
-        '<td><div class="dots-row">'+FIELDS.map((f,i)=>'<div class="dot '+dotClass(d[f])+'" title="'+FLABELS[i]+': '+d[f]+'" onclick="openFieldDropdown(event,'+idx+',\''+f+'\')"  >'+dotLabel(d[f])+'</div>').join("")+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
-        '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
-        '<td><button class="act-btn" onclick="openEdit('+idx+')">editar</button><button class="act-btn del" onclick="deleteProduct('+idx+')"  >\u2715</button></td></tr>';
+        '<td><button class="act-btn" onclick="openEdit('+idx+')">editar</button><button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button></td>'+
+        '</tr>';
     }).join("");
 
-  content.innerHTML='<div class="tbl-wrap"><table><thead><tr><th style="width:120px">ASIN</th><th>Producto</th><th style="width:190px">Img \u00b7 A+ \u00b7 T\u00edt \u00b7 Desc \u00b7 Blts</th><th style="width:80px">Score</th><th style="width:120px">Acciones</th></tr></thead><tbody>'+tbody+'</tbody></table></div>';
+  content.innerHTML='<div class="tbl-wrap"><table><thead><tr>'+
+    '<th style="width:120px">ASIN</th><th>Producto</th>'+
+    '<th style="width:190px">Img \u00b7 A+ \u00b7 T\u00edt \u00b7 Desc \u00b7 Blts</th>'+
+    '<th style="width:80px">Score</th><th style="width:120px">Acciones</th>'+
+    '</tr></thead><tbody>'+tbody+'</tbody></table></div>';
 
-  // Footer: count + pagination
   document.getElementById("footer-count").textContent=rows.length+" de "+data.length+" productos \u00b7 "+currentMP;
   renderPagination(totalPages);
 }
@@ -876,29 +881,31 @@ function exportFile(format){
 }
 
 // ── Inline field editor ──────────────────────────────────────
-let _fieldDropIdx = -1;
+let _fieldDropAsin = "";
 let _fieldDropKey = "";
 
-function openFieldDropdown(e, idx, field) {
+function openFieldDropdown(e, el) {
   e.stopPropagation();
+  const asin = el.dataset.asin;
+  const field = el.dataset.field;
   const dd = document.getElementById("field-dropdown");
   // Toggle: close if same dot clicked again
-  if (dd.style.display === "block" && _fieldDropIdx === idx && _fieldDropKey === field) {
+  if (dd.style.display === "block" && _fieldDropAsin === asin && _fieldDropKey === field) {
     dd.style.display = "none";
-    _fieldDropIdx = -1; _fieldDropKey = "";
+    _fieldDropAsin = ""; _fieldDropKey = "";
     return;
   }
-  _fieldDropIdx = idx;
+  _fieldDropAsin = asin;
   _fieldDropKey = field;
+  // Position relative to dot using getBoundingClientRect (viewport coords, no scroll needed)
+  const rect = el.getBoundingClientRect();
   dd.style.display = "block";
-  const rect = e.currentTarget.getBoundingClientRect();
-  let top = rect.bottom + 4 + window.scrollY;
-  let left = rect.left + window.scrollX;
-  if (left + 140 > window.innerWidth) left = window.innerWidth - 145;
-  dd.style.top = top + "px";
+  dd.style.top = (rect.bottom + 6) + "px";
+  let left = rect.left;
+  if (left + 150 > window.innerWidth) left = window.innerWidth - 155;
   dd.style.left = left + "px";
+  dd.style.position = "fixed";
 }
-
 async function applyFieldValue(val) {
   const dd = document.getElementById("field-dropdown");
   dd.style.display = "none";
@@ -923,7 +930,7 @@ document.addEventListener("click",function(e){
   const wrap=document.getElementById("export-wrap");
   if(wrap&&!wrap.contains(e.target)) document.getElementById("export-menu").classList.remove("open");
   const dd=document.getElementById("field-dropdown");
-  if(dd&&!dd.contains(e.target)) dd.style.display="none";
+  if(dd&&!dd.contains(e.target)){dd.style.display="none";_fieldDropAsin="";_fieldDropKey="";}
 });
 document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target===this) closeEdit();});
 
