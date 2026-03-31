@@ -158,6 +158,14 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
 .export-btn { transition: all .15s; }
 .export-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 
+/* PAGINATION */
+.pagination { display: flex; align-items: center; gap: 6px; }
+.pg-btn { font-family: var(--mono); font-size: 12px; padding: 5px 10px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text2); cursor: pointer; transition: all .15s; }
+.pg-btn:hover:not(:disabled) { background: var(--surface2); color: var(--text); transform: translateY(-1px); }
+.pg-btn:disabled { opacity: .35; cursor: not-allowed; }
+.pg-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+.pg-info { font-family: var(--mono); font-size: 11px; color: var(--text3); padding: 0 6px; }
+
 /* FOOTER ROW */
 .footer-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 12px; font-family: var(--mono); color: var(--text3); }
 
@@ -249,7 +257,7 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
   <div class="panel active" id="tab-dashboard">
     <div class="metrics" id="metrics"></div>
     <div class="toolbar">
-      <input type="text" class="search-input" id="search" placeholder="buscar por ASIN o nombre..." oninput="renderTable()">
+      <input type="text" class="search-input" id="search" placeholder="buscar por ASIN o nombre..." oninput="currentPage=1;renderTable()">
       <div class="filter-group" id="filters"></div>
       <div class="export-wrap" id="export-wrap">
         <button class="export-btn" onclick="toggleExportMenu()">base de datos ↓</button>
@@ -268,6 +276,7 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
     <div id="dashboard-content"></div>
     <div class="footer-row">
       <span id="footer-count"></span>
+      <div id="pagination"></div>
       <span id="last-sync-time"></span>
     </div>
   </div>
@@ -443,6 +452,8 @@ let nextIds   = {ES:100,IT:100,FR:100,GER:100,BEL:100,UK:100};
 let currentMP = "ES";
 let activeFilter = "all";
 let editIndex = -1;
+let currentPage = 1;
+const PAGE_SIZE = 10;
 
 // ── localStorage ─────────────────────────────────────────────
 const LS_KEY = "asin_manager_v2";
@@ -633,6 +644,7 @@ function showTab(t){
 }
 function setFilter(f){
   activeFilter=f;
+  currentPage=1;
   document.querySelectorAll(".fbtn").forEach(b=>b.classList.toggle("active",b.dataset.f===f));
   renderTable();
 }
@@ -653,6 +665,7 @@ function getFiltered(){
 function onMarketplaceChange(){
   currentMP=document.getElementById("mp-selector").value;
   activeFilter="all";
+  currentPage=1;
   document.getElementById("f-mp").value=currentMP;
   refresh();
 }
@@ -773,8 +786,61 @@ function renderTable(){
         '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
         '<td><button class="act-btn" onclick="openEdit('+idx+')">editar</button><button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button></td></tr>';
     }).join("");
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const pageRows = rows.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  // Re-render tbody with only current page rows
+  tbody = pageRows.length === 0 ? '<tr><td colspan="5" class="empty-state">sin resultados</td></tr>' :
+    pageRows.map(d => {
+      const s=score(d),pct=Math.round(s/5*100);
+      const idx=ALL_DATA[currentMP].indexOf(d);
+      const nameHTML=d.link
+        ?'<a href="'+d.link+'" target="_blank" rel="noopener" class="prod-link">'+d.producto+'</a>'
+        :'<span class="prod-nolink">'+d.producto+'</span>';
+      return '<tr><td><div class="asin-code">'+d.asin+'</div><div class="mp-tag">'+(d.mp||currentMP)+'</div></td>'+
+        '<td><div class="prod-name">'+nameHTML+(()=>{const nos=FIELDS.filter(f=>d[f]==="NO").map(f=>FNAME[f]);const wips=FIELDS.filter(f=>d[f]==="En proceso").map(f=>FNAME[f]);return(nos.length?'<div class="missing-hint">\u2717 '+nos.join(", ")+'</div>':'')+(wips.length?'<div class="wip-hint">\u2026 '+wips.join(", ")+'</div>':'');})()+'</div></td>'+
+        '<td><div class="dots-row">'+FIELDS.map((f,i)=>'<div class="dot '+dotClass(d[f])+'" title="'+FLABELS[i]+': '+d[f]+'" onclick="openFieldDropdown(event,'+idx+',\''+f+'\')"  >'+dotLabel(d[f])+'</div>').join("")+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
+        '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
+        '<td><button class="act-btn" onclick="openEdit('+idx+')">editar</button><button class="act-btn del" onclick="deleteProduct('+idx+')"  >\u2715</button></td></tr>';
+    }).join("");
+
   content.innerHTML='<div class="tbl-wrap"><table><thead><tr><th style="width:120px">ASIN</th><th>Producto</th><th style="width:190px">Img \u00b7 A+ \u00b7 T\u00edt \u00b7 Desc \u00b7 Blts</th><th style="width:80px">Score</th><th style="width:120px">Acciones</th></tr></thead><tbody>'+tbody+'</tbody></table></div>';
+
+  // Footer: count + pagination
   document.getElementById("footer-count").textContent=rows.length+" de "+data.length+" productos \u00b7 "+currentMP;
+  renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+  const el = document.getElementById("pagination");
+  if (!el) return;
+  if (totalPages <= 1) { el.innerHTML = ""; return; }
+  let html = '<div class="pagination">';
+  html += '<button class="pg-btn" onclick="goPage('+(currentPage-1)+')" '+(currentPage===1?"disabled":"")+'>← ant</button>';
+  // Page number buttons — show max 7
+  const delta = 2;
+  const pages = [];
+  for (let i=1; i<=totalPages; i++) {
+    if (i===1 || i===totalPages || (i>=currentPage-delta && i<=currentPage+delta)) pages.push(i);
+    else if (pages[pages.length-1]!=="...") pages.push("...");
+  }
+  pages.forEach(p => {
+    if (p==="...") html += '<span class="pg-info">…</span>';
+    else html += '<button class="pg-btn'+(p===currentPage?" active":"")+'" onclick="goPage('+p+')">'+p+'</button>';
+  });
+  html += '<button class="pg-btn" onclick="goPage('+(currentPage+1)+')" '+(currentPage===totalPages?"disabled":"")+'>sig →</button>';
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function goPage(p) {
+  const rows = getFiltered();
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  currentPage = Math.min(Math.max(1, p), totalPages);
+  renderTable();
+  window.scrollTo({top: 0, behavior: "smooth"});
 }
 function refresh(){renderMetrics();renderFilters();renderTable();}
 
