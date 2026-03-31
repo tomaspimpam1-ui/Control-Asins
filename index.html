@@ -61,7 +61,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .panel { display: none; } .panel.active { display: block; }
 
 /* METRICS */
-.metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+.metrics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
 .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
 .metric-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 6px; }
 .metric-value { font-size: 26px; font-weight: 300; color: var(--text); font-family: var(--mono); }
@@ -82,13 +82,15 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .export-wrap { position: relative; }
 .export-menu { display: none; position: absolute; right: 0; top: calc(100% + 4px); background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); min-width: 200px; z-index: 50; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
 .export-menu.open { display: block; }
-.export-option { padding: 10px 14px; font-size: 13px; font-family: var(--mono); cursor: pointer; color: var(--text); transition: background .1s; }
+.export-option { padding: 9px 14px; font-size: 13px; font-family: var(--mono); cursor: pointer; color: var(--text); transition: background .1s; }
 .export-option:hover { background: var(--surface2); }
+.export-menu-section { padding: 8px 14px 4px; font-size: 10px; font-family: var(--mono); color: var(--text3); text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
+.export-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
 /* TABLE */
 .tbl-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 table { width: 100%; border-collapse: collapse; }
-thead th { background: var(--surface2); font-size: 10px; font-family: var(--mono); font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+thead th { background: var(--surface2); font-size: 10px; font-family: var(--mono); font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
 tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: #fafaf7; }
@@ -100,14 +102,25 @@ td { padding: 10px 14px; vertical-align: middle; }
 .prod-link:hover { text-decoration: underline; }
 .prod-nolink { color: var(--text2); font-size: 12px; }
 .missing-hint { font-size: 11px; color: var(--red); margin-top: 3px; font-family: var(--mono); }
+.wip-hint { font-size: 11px; color: var(--amber); margin-top: 2px; font-family: var(--mono); }
 
 /* DOTS */
 .dots-row { display: flex; gap: 3px; }
-.dot { width: 24px; height: 24px; border-radius: 4px; font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; font-family: var(--mono); }
+.dot { width: 24px; height: 24px; border-radius: 4px; font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; font-family: var(--mono); cursor: pointer; position: relative; }
+.dot:hover { outline: 2px solid var(--border2); outline-offset: 1px; }
 .d-ok { background: var(--green-bg); color: var(--green); }
 .d-no { background: var(--red-bg); color: var(--red); }
 .d-wip { background: var(--amber-bg); color: var(--amber); }
 .dots-labels { font-size: 9px; color: var(--text3); margin-top: 3px; font-family: var(--mono); letter-spacing: .02em; }
+
+/* INLINE FIELD DROPDOWN */
+.field-dropdown { position: fixed; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); box-shadow: 0 6px 18px rgba(0,0,0,.12); z-index: 300; min-width: 130px; overflow: hidden; }
+.field-dropdown-item { padding: 9px 14px; font-size: 12px; font-family: var(--mono); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .1s; color: var(--text); }
+.field-dropdown-item:hover { background: var(--surface2); }
+.field-dropdown-item .di-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.di-ok { background: var(--green); }
+.di-no { background: var(--red); }
+.di-wip { background: var(--amber); }
 
 /* SCORE */
 .score-num { font-family: var(--mono); font-size: 13px; font-weight: 500; }
@@ -115,10 +128,35 @@ td { padding: 10px 14px; vertical-align: middle; }
 .score-fill { height: 100%; border-radius: 2px; }
 
 /* ACTION BUTTONS */
-.act-btn { font-size: 11px; font-family: var(--mono); padding: 4px 10px; border-radius: var(--radius); border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; margin-right: 4px; }
-.act-btn:hover { background: var(--surface2); color: var(--text); }
+.act-btn { font-size: 11px; font-family: var(--mono); padding: 4px 10px; border-radius: var(--radius); border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; margin-right: 4px; transition: all .15s; }
+.act-btn:hover { background: var(--surface2); color: var(--text); transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,.08); }
 .act-btn.del { color: var(--red); border-color: #f0b8b3; }
-.act-btn.del:hover { background: var(--red-bg); }
+.act-btn.del:hover { background: var(--red-bg); transform: translateY(-1px); }
+
+/* METRIC HOVER */
+.metric { transition: transform .15s, box-shadow .15s; cursor: default; }
+.metric:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.07); }
+
+/* FILTER BUTTON HOVER */
+.fbtn { transition: all .15s; }
+.fbtn:hover { transform: translateY(-1px); }
+.fbtn.active { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+
+/* TABLE ROW HOVER */
+tbody tr { transition: background .12s, transform .12s; }
+tbody tr:hover { background: #f3f2ec; }
+
+/* TABLE CELL HIGHLIGHT ON ROW HOVER */
+tbody tr:hover .asin-code { color: var(--blue); }
+tbody tr:hover .score-num { letter-spacing: .02em; }
+
+/* DOT HOVER */
+.dot { transition: transform .12s, opacity .12s; cursor: default; }
+.dot:hover { transform: scale(1.2); opacity: .85; }
+
+/* EXPORT BTN */
+.export-btn { transition: all .15s; }
+.export-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 
 /* FOOTER ROW */
 .footer-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 12px; font-family: var(--mono); color: var(--text3); }
@@ -214,14 +252,17 @@ td { padding: 10px 14px; vertical-align: middle; }
       <input type="text" class="search-input" id="search" placeholder="buscar por ASIN o nombre..." oninput="renderTable()">
       <div class="filter-group" id="filters"></div>
       <div class="export-wrap" id="export-wrap">
-        <button class="export-btn" onclick="toggleExportMenu()">exportar pendientes ↓</button>
+        <button class="export-btn" onclick="toggleExportMenu()">base de datos ↓</button>
         <div class="export-menu" id="export-menu">
+          <div class="export-menu-section">exportar pendientes</div>
           <div class="export-option" onclick="exportFile('csv')">📄 CSV (Excel, Sheets)</div>
           <div class="export-option" onclick="exportFile('xlsx')">📊 Excel (.xlsx)</div>
+          <div class="export-menu-divider"></div>
+          <div class="export-menu-section">base de datos</div>
+          <div class="export-option" onclick="downloadBackup();toggleExportMenu()">⬇ descargar backup</div>
+          <div class="export-option" onclick="triggerImport();toggleExportMenu()">⬆ restaurar backup</div>
         </div>
       </div>
-      <button class="export-btn" onclick="downloadBackup()" title="Descargar backup JSON">⬇ backup</button>
-      <button class="export-btn" onclick="triggerImport()" title="Restaurar desde backup">⬆ restaurar</button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
     </div>
     <div id="dashboard-content"></div>
@@ -340,6 +381,11 @@ td { padding: 10px 14px; vertical-align: middle; }
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="field-dropdown" id="field-dropdown" style="display:none">
+  <div class="field-dropdown-item" onclick="applyFieldValue('OK')"><span class="di-dot di-ok"></span>OK</div>
+  <div class="field-dropdown-item" onclick="applyFieldValue('En proceso')"><span class="di-dot di-wip"></span>En proceso</div>
+  <div class="field-dropdown-item" onclick="applyFieldValue('NO')"><span class="di-dot di-no"></span>NO</div>
+</div>
 
 <script>
 // ============================================================
@@ -597,9 +643,11 @@ function getFiltered(){
     const mq=!q||d.asin.toLowerCase().includes(q)||d.producto.toLowerCase().includes(q);
     if(!mq) return false;
     if(activeFilter==="all") return true;
-    if(activeFilter==="pending") return FIELDS.some(f=>d[f]!=="OK");
     if(activeFilter==="complete") return score(d)===5;
-    return d[activeFilter]!=="OK";
+    if(activeFilter==="pending") return FIELDS.some(f=>d[f]==="NO");
+    if(activeFilter==="wip") return FIELDS.some(f=>d[f]==="En proceso");
+    if(FIELDS.includes(activeFilter)) return d[activeFilter]!=="OK";
+    return true;
   });
 }
 function onMarketplaceChange(){
@@ -662,28 +710,47 @@ function toast(msg){
 function renderMetrics(){
   const data=currentData();
   const t=data.length,comp=data.filter(d=>score(d)===5).length;
-  const pend=data.filter(d=>score(d)<5).length;
+  const pend=data.filter(d=>FIELDS.some(f=>d[f]==="NO")).length;
+  const wip=data.filter(d=>FIELDS.some(f=>d[f]==="En proceso")).length;
   const naplus=data.filter(d=>d.aplus!=="OK").length;
   const ndesc=data.filter(d=>d.desc!=="OK").length;
   document.getElementById("metrics").innerHTML=
     '<div class="metric"><div class="metric-label">Total \u00b7 '+currentMP+'</div><div class="metric-value">'+t+'</div></div>'+
     '<div class="metric"><div class="metric-label">Completos</div><div class="metric-value grn">'+comp+'</div></div>'+
     '<div class="metric"><div class="metric-label">Pendientes</div><div class="metric-value red">'+pend+'</div></div>'+
+    '<div class="metric"><div class="metric-label">En Proceso</div><div class="metric-value amb">'+wip+'</div></div>'+
     '<div class="metric"><div class="metric-label">Sin A+</div><div class="metric-value amb">'+naplus+'</div></div>'+
     '<div class="metric"><div class="metric-label">Sin Descripci\u00f3n</div><div class="metric-value amb">'+ndesc+'</div></div>';
 }
 function renderFilters(){
   const data=currentData();
-  const counts={all:data.length,
-    pending:data.filter(d=>FIELDS.some(f=>d[f]!=="OK")).length,
+  const counts={
+    all:data.length,
     complete:data.filter(d=>score(d)===5).length,
+    pending:data.filter(d=>FIELDS.some(f=>d[f]==="NO")).length,
+    wip:data.filter(d=>FIELDS.some(f=>d[f]==="En proceso")).length,
+    img:data.filter(d=>d.img!=="OK").length,
     aplus:data.filter(d=>d.aplus!=="OK").length,
-    desc:data.filter(d=>d.desc!=="OK").length};
-  const labels={all:"todos",pending:"pendientes",complete:"completos",aplus:"sin A+",desc:"sin descripci\u00f3n"};
+    titulo:data.filter(d=>d.titulo!=="OK").length,
+    desc:data.filter(d=>d.desc!=="OK").length,
+    bullets:data.filter(d=>d.bullets!=="OK").length,
+  };
+  const labels={
+    all:"todos",
+    complete:"completos",
+    pending:"pendientes",
+    wip:"en proceso",
+    img:"im\u00e1genes",
+    aplus:"contenido A+",
+    titulo:"t\u00edtulo",
+    desc:"descripci\u00f3n",
+    bullets:"bullets",
+  };
   document.getElementById("filters").innerHTML=Object.entries(labels).map(([f,l])=>
-    '<button class="fbtn '+(f===activeFilter?"active":"")+'" data-f="'+f+'" onclick="setFilter(\''+f+'\')">'+l+' <span style="opacity:.55">'+counts[f]+'</span></button>'
+    '<button class="fbtn '+(f===activeFilter?"active":"")+'" data-f="'+f+'" onclick="setFilter(\''+f+'\')">'  +l+' <span style="opacity:.55">'+counts[f]+'</span></button>'
   ).join("");
 }
+
 function renderTable(){
   const data=currentData();
   const content=document.getElementById("dashboard-content");
@@ -701,8 +768,8 @@ function renderTable(){
         ?'<a href="'+d.link+'" target="_blank" rel="noopener" class="prod-link">'+d.producto+'</a>'
         :'<span class="prod-nolink">'+d.producto+'</span>';
       return '<tr><td><div class="asin-code">'+d.asin+'</div><div class="mp-tag">'+(d.mp||currentMP)+'</div></td>'+
-        '<td><div class="prod-name">'+nameHTML+(missing.length?'<div class="missing-hint">'+missing.join(", ")+'</div>':'')+'</div></td>'+
-        '<td><div class="dots-row">'+FIELDS.map((f,i)=>'<div class="dot '+dotClass(d[f])+'" title="'+FLABELS[i]+': '+d[f]+'">'+dotLabel(d[f])+'</div>').join("")+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
+        '<td><div class="prod-name">'+nameHTML+(()=>{const nos=FIELDS.filter(f=>d[f]==="NO").map(f=>FNAME[f]);const wips=FIELDS.filter(f=>d[f]==="En proceso").map(f=>FNAME[f]);return(nos.length?'<div class="missing-hint">\u2717 '+nos.join(", ")+'</div>':'')+(wips.length?'<div class="wip-hint">\u2026 '+wips.join(", ")+'</div>':'');})()+'</div></td>'+
+        '<td><div class="dots-row">'+FIELDS.map((f,i)=>'<div class="dot '+dotClass(d[f])+'" title="'+FLABELS[i]+': '+d[f]+'" onclick="openFieldDropdown(event,'+idx+',\''+f+'\')">'+dotLabel(d[f])+'</div>').join("")+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
         '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
         '<td><button class="act-btn" onclick="openEdit('+idx+')">editar</button><button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button></td></tr>';
     }).join("");
@@ -742,10 +809,51 @@ function exportFile(format){
   }
 }
 
+// ── Inline field editor ──────────────────────────────────────
+let _fieldDropIdx = -1;
+let _fieldDropKey = "";
+
+function openFieldDropdown(e, idx, field) {
+  e.stopPropagation();
+  _fieldDropIdx = idx;
+  _fieldDropKey = field;
+  const dd = document.getElementById("field-dropdown");
+  dd.style.display = "block";
+  // Position near the clicked dot
+  const rect = e.currentTarget.getBoundingClientRect();
+  let top = rect.bottom + 4 + window.scrollY;
+  let left = rect.left + window.scrollX;
+  // Keep within viewport
+  if (left + 140 > window.innerWidth) left = window.innerWidth - 145;
+  dd.style.top = top + "px";
+  dd.style.left = left + "px";
+}
+
+async function applyFieldValue(val) {
+  const dd = document.getElementById("field-dropdown");
+  dd.style.display = "none";
+  if (_fieldDropIdx < 0) return;
+  const d = ALL_DATA[currentMP][_fieldDropIdx];
+  if (!d || d[_fieldDropKey] === val) return;
+  const updated = { ...d, [_fieldDropKey]: val };
+  ALL_DATA[currentMP][_fieldDropIdx] = updated;
+  saveLocal();
+  refresh();
+  toast("Actualizado ✓");
+  try {
+    const res = await apiPost({ action: "update", mp: currentMP, entry: updated });
+    if (res.ok) { setSyncStatus("ok", "guardado ✓"); updateLastSync(); }
+    else throw new Error(res.error);
+  } catch(e) { setSyncStatus("err", "local ok · sin nube"); }
+  _fieldDropIdx = -1; _fieldDropKey = "";
+}
+
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener("click",function(e){
   const wrap=document.getElementById("export-wrap");
   if(wrap&&!wrap.contains(e.target)) document.getElementById("export-menu").classList.remove("open");
+  const dd=document.getElementById("field-dropdown");
+  if(dd&&!dd.contains(e.target)) dd.style.display="none";
 });
 document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target===this) closeEdit();});
 
