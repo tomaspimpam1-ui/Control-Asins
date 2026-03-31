@@ -815,15 +815,19 @@ let _fieldDropKey = "";
 
 function openFieldDropdown(e, idx, field) {
   e.stopPropagation();
+  const dd = document.getElementById("field-dropdown");
+  // Toggle: close if same dot clicked again
+  if (dd.style.display === "block" && _fieldDropIdx === idx && _fieldDropKey === field) {
+    dd.style.display = "none";
+    _fieldDropIdx = -1; _fieldDropKey = "";
+    return;
+  }
   _fieldDropIdx = idx;
   _fieldDropKey = field;
-  const dd = document.getElementById("field-dropdown");
   dd.style.display = "block";
-  // Position near the clicked dot
   const rect = e.currentTarget.getBoundingClientRect();
   let top = rect.bottom + 4 + window.scrollY;
   let left = rect.left + window.scrollX;
-  // Keep within viewport
   if (left + 140 > window.innerWidth) left = window.innerWidth - 145;
   dd.style.top = top + "px";
   dd.style.left = left + "px";
