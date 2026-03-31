@@ -105,7 +105,7 @@ td { padding: 10px 14px; vertical-align: middle; }
 .wip-hint { font-size: 11px; color: var(--amber); margin-top: 2px; font-family: var(--mono); }
 
 /* DOTS */
-.dots-row { display: flex; gap: 3px; }
+.dots-row { display: flex; gap: 7px; }
 .dot { width: 24px; height: 24px; border-radius: 4px; font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; font-family: var(--mono); cursor: pointer; position: relative; }
 .dot:hover { outline: 2px solid var(--border2); outline-offset: 1px; }
 .d-ok { background: var(--green-bg); color: var(--green); }
@@ -810,7 +810,7 @@ function renderTable(){
 
   content.innerHTML='<div class="tbl-wrap"><table><thead><tr>'+
     '<th style="width:120px">ASIN</th><th>Producto</th>'+
-    '<th style="width:190px">Img \u00b7 A+ \u00b7 T\u00edt \u00b7 Desc \u00b7 Blts</th>'+
+    '<th style="width:190px">Check</th>'+
     '<th style="width:80px">Score</th><th style="width:120px">Acciones</th>'+
     '</tr></thead><tbody>'+tbody+'</tbody></table></div>';
 
@@ -909,11 +909,13 @@ function openFieldDropdown(e, el) {
 async function applyFieldValue(val) {
   const dd = document.getElementById("field-dropdown");
   dd.style.display = "none";
-  if (_fieldDropIdx < 0) return;
-  const d = ALL_DATA[currentMP][_fieldDropIdx];
-  if (!d || d[_fieldDropKey] === val) return;
+  if (!_fieldDropAsin) return;
+  const idx = (ALL_DATA[currentMP]||[]).findIndex(d => d.asin === _fieldDropAsin);
+  if (idx < 0) return;
+  const d = ALL_DATA[currentMP][idx];
+  if (d[_fieldDropKey] === val) { _fieldDropAsin = ""; _fieldDropKey = ""; return; }
   const updated = { ...d, [_fieldDropKey]: val };
-  ALL_DATA[currentMP][_fieldDropIdx] = updated;
+  ALL_DATA[currentMP][idx] = updated;
   saveLocal();
   refresh();
   toast("Actualizado ✓");
@@ -922,7 +924,7 @@ async function applyFieldValue(val) {
     if (res.ok) { setSyncStatus("ok", "guardado ✓"); updateLastSync(); }
     else throw new Error(res.error);
   } catch(e) { setSyncStatus("err", "local ok · sin nube"); }
-  _fieldDropIdx = -1; _fieldDropKey = "";
+  _fieldDropAsin = ""; _fieldDropKey = "";
 }
 
 // ── Init ─────────────────────────────────────────────────────
