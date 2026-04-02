@@ -208,32 +208,56 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
 /* NOTES + HISTORY MODAL */
 .note-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:150;align-items:center;justify-content:center;}
 .note-modal-overlay.open{display:flex;}
-.note-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:600px;max-height:88vh;overflow-y:auto;}
-.note-modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 14px;border-bottom:1px solid var(--border);}
-.note-modal-title{font-size:14px;font-family:var(--mono);font-weight:500;color:var(--text);}
-.note-modal-sub{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono);}
-.note-section{padding:18px 20px;border-bottom:1px solid var(--border);}
-.note-section-label{font-size:10px;font-family:var(--mono);font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
-.note-textarea{width:100%;font-size:13px;font-family:var(--sans);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;resize:vertical;min-height:80px;color:var(--text);background:var(--surface);outline:none;box-sizing:border-box;}
-.note-textarea:focus{border-color:var(--blue);}
-.drop-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:background .15s;background:var(--surface2);}
-.drop-zone:hover{background:var(--blue-bg);border-color:var(--blue);}
-.drop-zone p{font-size:12px;color:var(--text2);margin:0;font-family:var(--mono);}
-.drop-zone span{color:var(--blue);cursor:pointer;}
-.note-img-preview{width:100%;border-radius:var(--radius);border:1px solid var(--border);display:block;margin-bottom:8px;cursor:zoom-in;}
-.note-img-meta{display:flex;justify-content:space-between;align-items:center;}
-.note-img-name{font-size:11px;color:var(--text3);font-family:var(--mono);}
-.note-del-img{font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--mono);}
-.note-actions{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;gap:10px;}
-.note-del-btn{font-size:12px;font-family:var(--mono);color:var(--red);background:none;border:1px solid #f0b8b3;border-radius:var(--radius);padding:7px 14px;cursor:pointer;}
-.note-del-btn:hover{background:var(--red-bg);}
-.note-badge{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);position:absolute;top:-3px;right:-3px;}
+.note-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:620px;height:90vh;max-height:680px;display:flex;flex-direction:column;overflow:hidden;}
+.note-modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface2);flex-shrink:0;}
+.note-modal-title{font-size:13px;font-family:var(--mono);font-weight:500;color:var(--text);}
+.note-modal-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono);}
+.note-pending-badge{font-size:10px;padding:2px 9px;border-radius:20px;background:var(--amber-bg);color:var(--amber);font-family:var(--mono);font-weight:500;border:1px solid #f0d9a0;}
+/* Chat area */
+.chat-area{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px;min-height:0;}
+.chat-empty{text-align:center;padding:32px 0;font-size:12px;font-family:var(--mono);color:var(--text3);}
+/* Note cards */
+.nc{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.nc-top{padding:10px 14px 8px;}
+.nc-meta{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap;}
+.nc-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0;background:var(--blue-bg);color:var(--blue);}
+.nc-author{font-size:12px;font-weight:500;color:var(--text);}
+.nc-date{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.nc-type-obs{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);font-family:var(--mono);margin-left:auto;}
+.nc-type-pend{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--amber-bg);color:var(--amber);border:1px solid #f0d9a0;font-family:var(--mono);margin-left:auto;}
+.nc-type-done{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--green-bg);color:var(--green);border:1px solid #b8dfc4;font-family:var(--mono);margin-left:auto;}
+.nc-text{font-size:13px;color:var(--text);line-height:1.55;margin:0;}
+.nc-text.done{text-decoration:line-through;color:var(--text3);}
+.nc-img{width:100%;display:block;max-height:160px;object-fit:cover;border-top:1px solid var(--border);cursor:zoom-in;}
+.nc-actions{display:flex;gap:6px;padding:7px 14px;border-top:1px solid var(--border);background:var(--surface2);}
+.nc-btn{font-size:11px;font-family:var(--mono);padding:4px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);transition:all .12s;}
+.nc-btn:hover{background:var(--surface);color:var(--text);}
+.nc-btn-done{color:var(--green);border-color:#b8dfc4;}
+.nc-btn-done:hover{background:var(--green-bg);}
+.nc-btn-del{color:var(--red);border-color:#f0b8b3;margin-left:auto;}
+.nc-btn-del:hover{background:var(--red-bg);}
+/* New note form */
+.new-note-area{border-top:1px solid var(--border);padding:14px 18px;background:var(--surface2);flex-shrink:0;}
+.new-note-row{display:flex;gap:8px;margin-bottom:8px;}
+.new-note-input{font-size:12px;font-family:var(--mono);padding:7px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);outline:none;}
+.new-note-input:focus{border-color:var(--blue);}
+.new-note-txt{width:100%;font-size:13px;font-family:var(--sans);padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);resize:none;box-sizing:border-box;min-height:60px;outline:none;}
+.new-note-txt:focus{border-color:var(--blue);}
+.new-note-img-preview{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);}
+.new-note-img-name{font-size:11px;font-family:var(--mono);color:var(--text2);flex:1;}
+.new-note-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+/* History */
+.note-badge{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);position:absolute;top:-3px;right:-3px;}
 .note-btn-wrap{position:relative;display:inline-flex;}
 .hist-entry{padding:12px 20px;border-bottom:1px solid var(--border);}
 .hist-entry:last-child{border-bottom:none;}
 .hist-time{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;}
 .hist-desc{font-size:12px;color:var(--text);}
 .hist-empty{padding:32px 20px;text-align:center;font-size:13px;font-family:var(--mono);color:var(--text3);}
+.drop-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;transition:background .15s;background:var(--surface);}
+.drop-zone:hover{background:var(--blue-bg);border-color:var(--blue);}
+.drop-zone p{font-size:11px;color:var(--text2);margin:0;font-family:var(--mono);}
+.drop-zone span{color:var(--blue);}
 
 /* TOAST */
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 11px 18px; border-radius: var(--radius); font-size: 13px; font-family: var(--mono); opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 200; }
@@ -429,30 +453,39 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
 <div class="note-modal-overlay" id="note-modal">
   <div class="note-modal">
     <div class="note-modal-header">
-      <div><div class="note-modal-title" id="note-modal-title">Notas</div><div class="note-modal-sub" id="note-modal-sub"></div></div>
-      <button class="modal-close" onclick="closeNoteModal()">x</button>
-    </div>
-    <div class="note-section">
-      <div class="note-section-label">Observacion</div>
-      <textarea class="note-textarea" id="note-text" placeholder="Escribe una observacion sobre este producto..."></textarea>
-    </div>
-    <div class="note-section">
-      <div class="note-section-label">Captura de pantalla</div>
-      <div id="note-img-wrap" style="display:none">
-        <img class="note-img-preview" id="note-img-preview" src="" alt="captura" onclick="openImgFull()"/>
-        <div class="note-img-meta"><span class="note-img-name" id="note-img-name"></span><button class="note-del-img" onclick="removeNoteImg()">eliminar imagen</button></div>
+      <div>
+        <div class="note-modal-title" id="note-modal-title">Notas</div>
+        <div class="note-modal-sub" id="note-modal-sub"></div>
       </div>
-      <div class="drop-zone" id="note-drop-zone" onclick="document.getElementById('note-file-input').click()" ondragover="event.preventDefault()" ondrop="handleImgDrop(event)">
-        <p>Arrastra una imagen aqui o Ctrl+V para pegar, o <span>selecciona un archivo</span></p>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="note-pending-badge" id="note-pending-badge" style="display:none"></span>
+        <button class="modal-close" onclick="closeNoteModal()">x</button>
+      </div>
+    </div>
+    <div class="chat-area" id="chat-area"></div>
+    <div class="new-note-area">
+      <div class="new-note-row">
+        <input class="new-note-input" id="note-author" placeholder="Tu nombre" style="flex:1;max-width:160px">
+        <select class="new-note-input" id="note-type" style="flex:1">
+          <option value="obs">Observacion</option>
+          <option value="tarea">Tarea</option>
+        </select>
+      </div>
+      <textarea class="new-note-txt" id="note-text" placeholder="Escribe una nota o tarea..."></textarea>
+      <div class="new-note-img-preview" id="new-note-img-wrap" style="display:none">
+        <span class="new-note-img-name" id="new-note-img-name"></span>
+        <button onclick="removeNewNoteImg()" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--mono)">eliminar</button>
+      </div>
+      <div class="new-note-footer">
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="export-btn" onclick="document.getElementById('note-file-input').click()" style="font-size:11px;padding:5px 12px">+ imagen</button>
+          <div class="drop-zone" id="note-drop-zone" ondragover="event.preventDefault()" ondrop="handleImgDrop(event)" style="padding:6px 12px;display:inline-block">
+            <p>o arrastra / Ctrl+V</p>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveNote()" style="font-size:12px;padding:7px 18px">agregar nota</button>
       </div>
       <input type="file" id="note-file-input" accept="image/*" style="display:none" onchange="handleNoteFileSelect(event)">
-    </div>
-    <div class="note-actions">
-      <button class="note-del-btn" id="note-del-btn" onclick="deleteNote()" style="display:none">eliminar nota</button>
-      <div style="display:flex;gap:10px;margin-left:auto">
-        <button class="btn-secondary" onclick="closeNoteModal()">cancelar</button>
-        <button class="btn-primary" onclick="saveNote()">guardar nota</button>
-      </div>
     </div>
   </div>
 </div>
@@ -471,6 +504,21 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
   <img id="img-full-src" src="" style="max-width:92vw;max-height:88vh;border-radius:8px;display:block"/>
 </div>
 <div class="toast" id="toast"></div>
+<!-- CONFIRM MODAL -->
+<div class="note-modal-overlay" id="confirm-modal">
+  <div class="note-modal" style="max-width:380px">
+    <div class="note-modal-header">
+      <div class="note-modal-title" id="confirm-title">Confirmar</div>
+    </div>
+    <div style="padding:16px 20px 8px">
+      <p id="confirm-msg" style="font-size:13px;font-family:var(--sans);color:var(--text);line-height:1.5;margin:0"></p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;padding:12px 20px">
+      <button class="btn-secondary" id="confirm-cancel-btn">cancelar</button>
+      <button class="btn-primary" id="confirm-ok-btn">eliminar</button>
+    </div>
+  </div>
+</div>
 <div class="field-dropdown" id="field-dropdown" style="display:none">
   <div class="field-dropdown-label">cambiar estado</div>
   <div class="field-dropdown-item" onclick="applyFieldValue('OK')"><span class="di-dot di-ok"></span>OK</div>
@@ -624,7 +672,7 @@ async function saveProduct(){
     titulo:document.getElementById("f-titulo").value,
     desc:document.getElementById("f-desc").value,
     bullets:document.getElementById("f-bullets").value,
-    link,producto:prod,createdAt:new Date().toISOString(),nota:'',notaImg:'',notaImgName:'',notaUpdatedAt:'',historial:[]};
+    link,producto:prod,createdAt:new Date().toISOString(),notas:[],historial:[]};
   if(!ALL_DATA[mp]) ALL_DATA[mp]=[];
   ALL_DATA[mp].push(entry);
   saveLocal();
@@ -893,7 +941,7 @@ function renderTable(){
         '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
         '<td>'+
         '<button class="act-btn" onclick="openEdit('+idx+')">editar</button>'+
-        '<span class="note-btn-wrap" style="display:inline-flex;position:relative"><button class="act-btn" style="padding:4px 7px" onclick="openNoteModal(\''+asin+'\')">&#128221;'+(d.nota||d.notaImg?'<span class="note-badge"></span>':'')+'</button></span>'+
+        '<span class="note-btn-wrap" style="display:inline-flex;position:relative"><button class="act-btn" style="padding:4px 7px" onclick="openNoteModal(\''+asin+'\')">&#128221;'+(()=>{const ns=Array.isArray(d.notas)?d.notas:[];const pend=ns.filter(n=>n.tipo==='tarea'&&n.estado==='pendiente').length;return pend>0?'<span class="note-badge" style="background:var(--amber);font-size:9px;color:#fff;width:14px;height:14px;display:flex;align-items:center;justify-content:center;font-family:var(--mono)">'+pend+'</span>':ns.length>0?'<span class="note-badge"></span>':''})()+'</button></span>'+
         '<button class="act-btn" style="padding:4px 7px" onclick="openHistModal(\''+asin+'\')">&#128336;</button>'+
         '<button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button>'+
         '</td>'+
@@ -1032,39 +1080,87 @@ document.getElementById("edit-modal").addEventListener("click",function(e){if(e.
 
 
 // Notes
+// ── Saved author name ────────────────────────────────────────
+const AUTHOR_KEY = "asin_note_author";
+function getSavedAuthor(){try{return localStorage.getItem(AUTHOR_KEY)||"";}catch(e){return "";}}
+function saveAuthor(v){try{localStorage.setItem(AUTHOR_KEY,v);}catch(e){}}
+
+// ── New note image state ──────────────────────────────────────
+let _newNoteImg = null;
+
+function removeNewNoteImg(){
+  _newNoteImg=null;
+  document.getElementById("new-note-img-wrap").style.display="none";
+}
+
+// ── Open note modal ───────────────────────────────────────────
 function openNoteModal(asin){
   _noteAsin=asin;
+  _newNoteImg=null;
   const d=(ALL_DATA[currentMP]||[]).find(x=>x.asin===asin)||{};
   document.getElementById("note-modal-title").textContent="Notas - "+asin;
   document.getElementById("note-modal-sub").textContent=d.producto||"";
-  document.getElementById("note-text").value=d.nota||"";
-  _noteImg=d.notaImg?{data:d.notaImg,name:d.notaImgName||"imagen"}:null;
-  renderNoteImg();
-  document.getElementById("note-del-btn").style.display=(d.nota||d.notaImg)?"block":"none";
+  document.getElementById("note-author").value=getSavedAuthor();
+  document.getElementById("note-text").value="";
+  document.getElementById("note-type").value="obs";
+  document.getElementById("new-note-img-wrap").style.display="none";
+  renderChat(d);
   document.getElementById("note-modal").classList.add("open");
   document.addEventListener("paste",handlePaste);
 }
+
 function closeNoteModal(){
   document.getElementById("note-modal").classList.remove("open");
   document.removeEventListener("paste",handlePaste);
-  _noteAsin="";_noteImg=null;
+  _noteAsin="";_newNoteImg=null;
 }
-function renderNoteImg(){
-  const wrap=document.getElementById("note-img-wrap");
-  const zone=document.getElementById("note-drop-zone");
-  if(_noteImg){
-    document.getElementById("note-img-preview").src=_noteImg.data;
-    document.getElementById("note-img-name").textContent=_noteImg.name;
-    wrap.style.display="block";zone.style.display="none";
-  }else{wrap.style.display="none";zone.style.display="block";}
+
+function renderChat(d){
+  const notas=Array.isArray(d.notas)?d.notas:[];
+  const pend=notas.filter(n=>n.tipo==="tarea"&&n.estado==="pendiente").length;
+  const badge=document.getElementById("note-pending-badge");
+  if(pend>0){badge.textContent=pend+" pendiente"+(pend>1?"s":"");badge.style.display="";}
+  else badge.style.display="none";
+
+  const area=document.getElementById("chat-area");
+  if(notas.length===0){area.innerHTML='<div class="chat-empty">Sin notas aun. Agrega la primera abajo.</div>';return;}
+
+  area.innerHTML=[...notas].reverse().map((n,ri)=>{
+    const i=notas.length-1-ri;
+    const fecha=new Date(n.ts).toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})+" - "+new Date(n.ts).toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+    const initials=n.autor?n.autor.trim().split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2):"?";
+    const badgeCls=n.tipo==="obs"?"nc-type-obs":n.estado==="listo"?"nc-type-done":"nc-type-pend";
+    const badgeTxt=n.tipo==="obs"?"observacion":n.estado==="listo"?"tarea - listo":"tarea - pendiente";
+    const textCls=n.estado==="listo"?"nc-text done":"nc-text";
+    const imgHTML=n.img?'<img class="nc-img" src="'+n.img+'" onclick="openImgFullSrc(this.src)" />':'';
+    const doneBtn=n.tipo==="tarea"&&n.estado==="pendiente"?'<button class="nc-btn nc-btn-done" onclick="markNoteDone('+i+')">marcar como listo</button>':'';
+    return '<div class="nc">'+
+      '<div class="nc-top">'+
+      '<div class="nc-meta">'+
+      '<div class="nc-avatar">'+initials+'</div>'+
+      '<span class="nc-author">'+n.autor+'</span>'+
+      '<span class="nc-date">'+fecha+'</span>'+
+      '<span class="'+badgeCls+'">'+badgeTxt+'</span>'+
+      '</div>'+
+      '<p class="'+textCls+'">'+n.texto+'</p>'+
+      '</div>'+
+      imgHTML+
+      '<div class="nc-actions">'+doneBtn+'<button class="nc-btn nc-btn-del" onclick="deleteNoteItem('+i+')">eliminar</button></div>'+
+      '</div>';
+  }).join("");
 }
-function removeNoteImg(){_noteImg=null;renderNoteImg();}
+
+function openImgFullSrc(src){
+  document.getElementById("img-full-src").src=src;
+  document.getElementById("img-full-modal").classList.add("open");
+}
 function openImgFull(){
-  if(!_noteImg)return;
-  document.getElementById("img-full-src").src=_noteImg.data;
+  document.getElementById("img-full-src").src=_newNoteImg?_newNoteImg.data:"";
   document.getElementById("img-full-modal").classList.add("open");
 }
 function closeImgFull(){document.getElementById("img-full-modal").classList.remove("open");}
+
+// ── Image helpers ─────────────────────────────────────────────
 function handlePaste(e){
   const items=e.clipboardData&&e.clipboardData.items;if(!items)return;
   for(let i=0;i<items.length;i++){
@@ -1079,7 +1175,7 @@ function handleNoteFileSelect(ev){
   const file=ev.target.files[0];if(file)readImgFile(file,file.name);ev.target.value="";
 }
 function readImgFile(file,name){
-  if(file.size>1.5*1024*1024){toast("Imagen muy grande (max 1.5 MB)");return;}
+  if(file.size>5*1024*1024){toast("Imagen muy grande (max 5 MB)");return;}
   const reader=new FileReader();
   reader.onload=ev=>{
     const img=new Image();
@@ -1088,43 +1184,76 @@ function readImgFile(file,name){
       if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
       const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
       canvas.getContext("2d").drawImage(img,0,0,w,h);
-      _noteImg={data:canvas.toDataURL("image/jpeg",0.75),name};renderNoteImg();
+      _newNoteImg={data:canvas.toDataURL("image/jpeg",0.75),name};
+      document.getElementById("new-note-img-name").textContent=name;
+      document.getElementById("new-note-img-wrap").style.display="flex";
     };img.src=ev.target.result;
   };reader.readAsDataURL(file);
 }
+
+// ── Save new note ─────────────────────────────────────────────
 async function saveNote(){
   if(!_noteAsin)return;
+  const autor=document.getElementById("note-author").value.trim();
+  const texto=document.getElementById("note-text").value.trim();
+  const tipo=document.getElementById("note-type").value;
+  if(!texto){toast("Escribe algo antes de agregar");return;}
+  if(!autor){toast("Ingresa tu nombre");return;}
+  saveAuthor(autor);
   const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
   const prev=ALL_DATA[currentMP][idx];
-  const nota=document.getElementById("note-text").value.trim();
+  const notas=Array.isArray(prev.notas)?[...prev.notas]:[];
+  const newNota={id:Date.now(),ts:new Date().toISOString(),autor,tipo,estado:tipo==="tarea"?"pendiente":"",texto,img:_newNoteImg?_newNoteImg.data:""};
+  notas.push(newNota);
   const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
-  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:nota?"Nota actualizada":"Nota guardada sin texto"});
-  const updated={...prev,nota,notaImg:_noteImg?_noteImg.data:"",notaImgName:_noteImg?_noteImg.name:"",notaUpdatedAt:new Date().toISOString(),historial:hist};
-  ALL_DATA[currentMP][idx]=updated;saveLocal();refresh();closeNoteModal();
-  toast("Nota guardada");
+  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:autor+" agrego "+(tipo==="tarea"?"tarea":"observacion")+": "+texto.slice(0,60)});
+  const updated={...prev,notas,historial:hist};
+  ALL_DATA[currentMP][idx]=updated;saveLocal();
+  document.getElementById("note-text").value="";
+  _newNoteImg=null;document.getElementById("new-note-img-wrap").style.display="none";
+  renderChat(updated);refresh();
+  toast("Nota agregada");
   try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado");updateLastSync();}}
   catch(e){setSyncStatus("err","local ok - sin nube");}
 }
-async function deleteNote(){
-  if(!_noteAsin)return;
-  if(!confirm("Eliminar la nota de este producto?"))return;
+
+// ── Mark task as done ─────────────────────────────────────────
+async function markNoteDone(noteIdx){
   const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
   const prev=ALL_DATA[currentMP][idx];
+  const notas=[...prev.notas];
+  notas[noteIdx]={...notas[noteIdx],estado:"listo"};
   const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
-  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Nota eliminada"});
-  const updated={...prev,nota:"",notaImg:"",notaImgName:"",notaUpdatedAt:"",historial:hist};
-  ALL_DATA[currentMP][idx]=updated;saveLocal();refresh();closeNoteModal();
-  toast("Nota eliminada");
+  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Tarea marcada como listo: "+notas[noteIdx].texto.slice(0,60)});
+  const updated={...prev,notas,historial:hist};
+  ALL_DATA[currentMP][idx]=updated;saveLocal();renderChat(updated);refresh();
+  toast("Marcado como listo");
   try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado");updateLastSync();}}
   catch(e){setSyncStatus("err","local ok - sin nube");}
 }
-// History
+
+// ── Delete single note ────────────────────────────────────────
+function deleteNoteItem(noteIdx){
+  showConfirm("Eliminar nota","Esta accion no se puede deshacer.","eliminar","var(--red)",async()=>{
+    const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
+    const prev=ALL_DATA[currentMP][idx];
+    const notas=prev.notas.filter((_,i)=>i!==noteIdx);
+    const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
+    hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Nota eliminada"});
+    const updated={...prev,notas,historial:hist};
+    ALL_DATA[currentMP][idx]=updated;saveLocal();renderChat(updated);refresh();
+    toast("Nota eliminada");
+    try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado");updateLastSync();}}
+    catch(e){setSyncStatus("err","local ok - sin nube");}
+  });
+}
+
+// ── History ───────────────────────────────────────────────────
 function openHistModal(asin){
   const d=(ALL_DATA[currentMP]||[]).find(x=>x.asin===asin)||{};
   document.getElementById("hist-modal-title").textContent="Historial - "+asin;
   document.getElementById("hist-modal-sub").textContent=d.producto||"";
   const hist=Array.isArray(d.historial)?d.historial:[];
-  const icons={edicion:"e",check:"c",nota:"n"};
   const tipos={edicion:"Edicion",check:"Check",nota:"Nota"};
   let html=hist.length===0?'<div class="hist-empty">Sin cambios registrados aun</div>':
     hist.map(h=>{
@@ -1143,9 +1272,201 @@ function openHistModal(asin){
 function closeHistModal(){document.getElementById("hist-modal").classList.remove("open");}
 
 document.getElementById("note-modal").addEventListener("click",function(e){if(e.target===this)closeNoteModal();});
+document.getElementById("confirm-modal").addEventListener("click",function(e){if(e.target===this)document.getElementById("confirm-modal").classList.remove("open");});
 document.getElementById("hist-modal").addEventListener("click",function(e){if(e.target===this)closeHistModal();});
+function showConfirm(title,msg,okLabel,okStyle,onOk){
+  document.getElementById("confirm-title").textContent=title;
+  document.getElementById("confirm-msg").textContent=msg;
+  const okBtn=document.getElementById("confirm-ok-btn");
+  const cancelBtn=document.getElementById("confirm-cancel-btn");
+  okBtn.textContent=okLabel||"eliminar";
+  okBtn.style.background=okStyle||"var(--red)";
+  okBtn.style.borderColor=okStyle||"var(--red)";
+  const modal=document.getElementById("confirm-modal");
+  modal.classList.add("open");
+  const close=()=>{modal.classList.remove("open");okBtn.onclick=null;cancelBtn.onclick=null;};
+  okBtn.onclick=()=>{close();onOk();};
+  cancelBtn.onclick=close;
+}
+
 loadFromCloud();
 setInterval(()=>loadFromCloud(true),120000);
 </script>
 </body>
-</html>
+</html>// Notes
+let _noteNewImg = null;
+
+function openNoteModal(asin){
+  _noteAsin=asin;
+  const d=(ALL_DATA[currentMP]||[]).find(x=>x.asin===asin)||{};
+  document.getElementById("note-modal-title").textContent="Notas - "+asin;
+  document.getElementById("note-modal-sub").textContent=d.producto||"";
+  _noteNewImg=null;
+  renderNoteImgZone();
+  renderChat(d);
+  document.getElementById("nn-text").value="";
+  document.getElementById("note-modal").classList.add("open");
+  document.addEventListener("paste",handleNewPaste);
+}
+
+function closeNoteModal(){
+  document.getElementById("note-modal").classList.remove("open");
+  document.removeEventListener("paste",handleNewPaste);
+  _noteAsin="";_noteNewImg=null;
+}
+
+function renderChat(d){
+  const notas=Array.isArray(d.notas)?d.notas:[];
+  const pend=notas.filter(n=>n.tipo==="task"&&n.estado==="pend").length;
+  const badge=document.getElementById("note-pend-badge");
+  if(pend>0){badge.textContent=pend+" pendiente"+(pend>1?"s":"");badge.style.display="inline";}
+  else{badge.style.display="none";}
+
+  const area=document.getElementById("chat-area");
+  if(notas.length===0){
+    area.innerHTML='<div class="chat-empty">Sin notas aun. Agrega la primera.</div>';
+    return;
+  }
+  // Sort newest first
+  const sorted=[...notas].sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  area.innerHTML=sorted.map(n=>{
+    const dt=new Date(n.ts);
+    const fmt=dt.toLocaleDateString("es-ES",{day:"2-digit",month:"short"})+' · '+dt.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+    const initials=(n.autor||"?").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+    const isDone=n.tipo==="task"&&n.estado==="done";
+    const isPend=n.tipo==="task"&&n.estado==="pend";
+    const typeLabel=n.tipo==="task"?(isPend?"tarea · pendiente":"tarea · listo"):"observación";
+    const typeClass=n.tipo==="obs"?"t-obs":isPend?"t-pend":"t-done";
+    const cardClass="nc"+(isDone?" done-card":"");
+    const imgHTML=n.img?'<img class="nc-img" src="'+n.img+'" onclick="openImgFull(\''+n.id+'\')"/>':'\';
+    const doneBtn=isPend?'<button class="nc-btn nc-btn-done" onclick="markNoteDone(\''+n.id+'\')">marcar como listo</button>':'\';
+    return '<div class="'+cardClass+'" id="nc-'+n.id+'">'+
+      '<div class="nc-top">'+
+        '<div class="nc-meta">'+
+          '<div class="nc-avatar">'+initials+'</div>'+
+          '<span class="nc-author">'+n.autor+'</span>'+
+          '<span class="nc-date">'+fmt+'</span>'+
+          '<span class="nc-type '+typeClass+'">'+typeLabel+'</span>'+
+        '</div>'+
+        '<p class="nc-text'+(isDone?' struck':'')+'">'+n.texto+'</p>'+
+      '</div>'+
+      imgHTML+
+      '<div class="nc-actions">'+doneBtn+'<button class="nc-btn nc-btn-del" onclick="deleteNoteItem(\''+n.id+'\')">eliminar</button></div>'+
+    '</div>';
+  }).join("");
+}
+
+function renderNoteImgZone(){
+  const zone=document.getElementById("nn-drop-zone");
+  const wrap=document.getElementById("nn-img-wrap");
+  if(_noteNewImg){
+    wrap.innerHTML='<div class="img-attached-name"><span style="color:var(--green)">✓</span> '+_noteNewImg.name+' <button onclick="_noteNewImg=null;renderNoteImgZone()" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:11px;font-family:var(--mono)">x</button></div>'+
+      '<input type="file" id="nn-file-input" accept="image/*" style="display:none" onchange="handleNewNoteFileSelect(event)">';
+  } else {
+    wrap.innerHTML='<div class="img-attach-zone" id="nn-drop-zone" onclick="document.getElementById(\'nn-file-input\').click()" ondragover="event.preventDefault()" ondrop="handleNewImgDrop(event)">+ imagen</div>'+
+      '<input type="file" id="nn-file-input" accept="image/*" style="display:none" onchange="handleNewNoteFileSelect(event)">';
+  }
+}
+
+function handleNewPaste(e){
+  const items=e.clipboardData&&e.clipboardData.items;if(!items)return;
+  for(let i=0;i<items.length;i++){
+    if(items[i].type.startsWith("image/")){e.preventDefault();readNewImgFile(items[i].getAsFile(),"captura_pegada.png");break;}
+  }
+}
+function handleNewImgDrop(e){
+  e.preventDefault();const file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith("image/"))readNewImgFile(file,file.name);
+}
+function handleNewNoteFileSelect(ev){
+  const file=ev.target.files[0];if(file)readNewImgFile(file,file.name);ev.target.value="";
+}
+function readNewImgFile(file,name){
+  if(file.size>5*1024*1024){toast("Imagen muy grande (max 5 MB)");return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=900;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
+      canvas.getContext("2d").drawImage(img,0,0,w,h);
+      _noteNewImg={data:canvas.toDataURL("image/jpeg",0.75),name};
+      renderNoteImgZone();
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(file);
+}
+
+function openImgFull(noteId){
+  const d=(ALL_DATA[currentMP]||[]).find(x=>x.asin===_noteAsin);
+  if(!d||!Array.isArray(d.notas))return;
+  const n=d.notas.find(x=>x.id===noteId);
+  if(!n||!n.img)return;
+  document.getElementById("img-full-src").src=n.img;
+  document.getElementById("img-full-modal").classList.add("open");
+}
+function closeImgFull(){document.getElementById("img-full-modal").classList.remove("open");}
+
+async function addNote(){
+  if(!_noteAsin)return;
+  const autor=document.getElementById("nn-author").value.trim();
+  const tipo=document.getElementById("nn-type").value;
+  const texto=document.getElementById("nn-text").value.trim();
+  if(!texto){toast("Escribe algo antes de agregar");return;}
+  if(!autor){toast("Ingresa tu nombre");return;}
+
+  const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
+  const prev=ALL_DATA[currentMP][idx];
+  const notas=Array.isArray(prev.notas)?[...prev.notas]:[];
+  const newNote={
+    id:Date.now().toString(36),
+    ts:new Date().toISOString(),
+    autor,tipo,texto,
+    estado:tipo==="task"?"pend":"obs",
+    img:_noteNewImg?_noteNewImg.data:""
+  };
+  notas.push(newNote);
+  const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
+  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:(tipo==="task"?"Tarea":"Observacion")+" agregada por "+autor});
+  const updated={...prev,notas,historial:hist};
+  ALL_DATA[currentMP][idx]=updated;saveLocal();
+  closeNoteModal();
+  refresh();
+  toast("Nota agregada ✓");
+  try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado");updateLastSync();}}
+  catch(e){setSyncStatus("err","local ok - sin nube");}
+}
+
+async function markNoteDone(noteId){
+  const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
+  const prev=ALL_DATA[currentMP][idx];
+  const notas=(Array.isArray(prev.notas)?[...prev.notas]:[]).map(n=>n.id===noteId?{...n,estado:"done"}:n);
+  const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
+  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Tarea marcada como lista"});
+  const updated={...prev,notas,historial:hist};
+  ALL_DATA[currentMP][idx]=updated;saveLocal();
+  renderChat(updated);refresh();
+  toast("Tarea completada");
+  try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado");updateLastSync();}}
+  catch(e){setSyncStatus("err","local ok - sin nube");}
+}
+
+async function deleteNoteItem(noteId){
+  showConfirm("Eliminar nota","Esta accion no se puede deshacer.","eliminar","var(--red)",async()=>{
+    const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
+    const prev=ALL_DATA[currentMP][idx];
+    const notas=(Array.isArray(prev.notas)?[...prev.notas]:[]).filter(n=>n.id!==noteId);
+    const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
+    hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Nota eliminada"});
+    const updated={...prev,notas,historial:hist};
+    ALL_DATA[currentMP][idx]=updated;saveLocal();
+    renderChat(updated);refresh();
+    toast("Nota eliminada");
+    try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado");updateLastSync();}}
+    catch(e){setSyncStatus("err","local ok - sin nube");}
+  });
+}
+
+// Legacy compat
+function saveNote(){}
+function deleteNote(){}
