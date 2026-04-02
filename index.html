@@ -1125,15 +1125,16 @@ function renderChat(d){
   const area=document.getElementById("chat-area");
   if(notas.length===0){area.innerHTML='<div class="chat-empty">Sin notas aun. Agrega la primera abajo.</div>';return;}
 
-  area.innerHTML=[...notas].reverse().map((n,ri)=>{
-    const i=notas.length-1-ri;
+  const sorted=[...notas].sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  area.innerHTML=sorted.map(n=>{
     const fecha=new Date(n.ts).toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})+" - "+new Date(n.ts).toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
     const initials=n.autor?n.autor.trim().split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2):"?";
     const badgeCls=n.tipo==="obs"?"nc-type-obs":n.estado==="listo"?"nc-type-done":"nc-type-pend";
-    const badgeTxt=n.tipo==="obs"?"observacion":n.estado==="listo"?"tarea - listo":"tarea - pendiente";
+    const badgeTxt=n.tipo==="obs"?"observacion":n.estado==="listo"?"tarea · listo":"tarea · pendiente";
     const textCls=n.estado==="listo"?"nc-text done":"nc-text";
     const imgHTML=n.img?'<img class="nc-img" src="'+n.img+'" onclick="openImgFullSrc(this.src)" />':'';
-    const doneBtn=n.tipo==="tarea"&&n.estado==="pendiente"?'<button class="nc-btn nc-btn-done" onclick="markNoteDone('+i+')">marcar como listo</button>':'';
+    const noteId=n.id;
+    const doneBtn=n.tipo==="tarea"&&n.estado==="pendiente"?'<button class="nc-btn nc-btn-done" onclick="markNoteDone(\''+noteId+'\')">marcar como listo</button>':'';
     return '<div class="nc">'+
       '<div class="nc-top">'+
       '<div class="nc-meta">'+
@@ -1145,9 +1146,10 @@ function renderChat(d){
       '<p class="'+textCls+'">'+n.texto+'</p>'+
       '</div>'+
       imgHTML+
-      '<div class="nc-actions">'+doneBtn+'<button class="nc-btn nc-btn-del" onclick="deleteNoteItem('+i+')">eliminar</button></div>'+
+      '<div class="nc-actions">'+doneBtn+'<button class="nc-btn nc-btn-del" onclick="deleteNoteItem(\''+noteId+'\')">eliminar</button></div>'+
       '</div>';
   }).join("");
+  area.scrollTop=0;
 }
 
 function openImgFullSrc(src){
@@ -1218,13 +1220,13 @@ async function saveNote(){
 }
 
 // ── Mark task as done ─────────────────────────────────────────
-async function markNoteDone(noteIdx){
+async function markNoteDone(noteId){
   const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
   const prev=ALL_DATA[currentMP][idx];
-  const notas=[...prev.notas];
-  notas[noteIdx]={...notas[noteIdx],estado:"listo"};
+  const notas=[...prev.notas].map(n=>String(n.id)===String(noteId)?{...n,estado:"listo"}:n);
+  const done=notas.find(n=>String(n.id)===String(noteId));
   const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
-  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Tarea marcada como listo: "+notas[noteIdx].texto.slice(0,60)});
+  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Tarea marcada como listo: "+(done?done.texto.slice(0,60):"")});
   const updated={...prev,notas,historial:hist};
   ALL_DATA[currentMP][idx]=updated;saveLocal();renderChat(updated);refresh();
   toast("Marcado como listo");
@@ -1233,11 +1235,11 @@ async function markNoteDone(noteIdx){
 }
 
 // ── Delete single note ────────────────────────────────────────
-function deleteNoteItem(noteIdx){
+function deleteNoteItem(noteId){
   showConfirm("Eliminar nota","Esta accion no se puede deshacer.","eliminar","var(--red)",async()=>{
     const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
     const prev=ALL_DATA[currentMP][idx];
-    const notas=prev.notas.filter((_,i)=>i!==noteIdx);
+    const notas=prev.notas.filter(n=>String(n.id)!==String(noteId));
     const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
     hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Nota eliminada"});
     const updated={...prev,notas,historial:hist};
