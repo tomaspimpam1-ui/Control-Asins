@@ -1291,9 +1291,8 @@ function showConfirm(title,msg,okLabel,okStyle,onOk){
 
 loadFromCloud();
 setInterval(()=>loadFromCloud(true),120000);
-</script>
-</body>
-</html>// Notes
+
+// Notes
 let _noteNewImg = null;
 
 function openNoteModal(asin){
@@ -1338,8 +1337,8 @@ function renderChat(d){
     const typeLabel=n.tipo==="task"?(isPend?"tarea · pendiente":"tarea · listo"):"observación";
     const typeClass=n.tipo==="obs"?"t-obs":isPend?"t-pend":"t-done";
     const cardClass="nc"+(isDone?" done-card":"");
-    const imgHTML=n.img?'<img class="nc-img" src="'+n.img+'" onclick="openImgFull(\''+n.id+'\')"/>':'\';
-    const doneBtn=isPend?'<button class="nc-btn nc-btn-done" onclick="markNoteDone(\''+n.id+'\')">marcar como listo</button>':'\';
+    const imgHTML=n.img?'<img class="nc-img" src="'+n.img+'" onclick="openImgFull(\''+n.id+'\')"/>':'';
+    const doneBtn=isPend?'<button class="nc-btn nc-btn-done" onclick="markNoteDone(\''+n.id+'\')">marcar como listo</button>':'';
     return '<div class="'+cardClass+'" id="nc-'+n.id+'">'+
       '<div class="nc-top">'+
         '<div class="nc-meta">'+
@@ -1470,3 +1469,6 @@ async function deleteNoteItem(noteId){
 // Legacy compat
 function saveNote(){}
 function deleteNote(){}
+</script>
+</body>
+</html>
