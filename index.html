@@ -103,6 +103,7 @@ td { padding: 10px 14px; vertical-align: middle; }
 .prod-nolink { color: var(--text2); font-size: 12px; }
 .missing-hint { font-size: 11px; color: var(--red); margin-top: 3px; font-family: var(--mono); }
 .wip-hint { font-size: 11px; color: var(--amber); margin-top: 2px; font-family: var(--mono); }
+.wip-hint { font-size: 11px; color: var(--amber); margin-top: 2px; font-family: var(--mono); }
 
 /* DOTS */
 .dots-row { display: flex; gap: 7px; }
@@ -202,6 +203,37 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
 .modal-title { font-size: 14px; font-family: var(--mono); font-weight: 500; }
 .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text2); line-height: 1; padding: 2px 6px; }
 .modal-close:hover { color: var(--text); }
+
+
+/* NOTES + HISTORY MODAL */
+.note-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:150;align-items:center;justify-content:center;}
+.note-modal-overlay.open{display:flex;}
+.note-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:600px;max-height:88vh;overflow-y:auto;}
+.note-modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 14px;border-bottom:1px solid var(--border);}
+.note-modal-title{font-size:14px;font-family:var(--mono);font-weight:500;color:var(--text);}
+.note-modal-sub{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono);}
+.note-section{padding:18px 20px;border-bottom:1px solid var(--border);}
+.note-section-label{font-size:10px;font-family:var(--mono);font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.note-textarea{width:100%;font-size:13px;font-family:var(--sans);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;resize:vertical;min-height:80px;color:var(--text);background:var(--surface);outline:none;box-sizing:border-box;}
+.note-textarea:focus{border-color:var(--blue);}
+.drop-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:background .15s;background:var(--surface2);}
+.drop-zone:hover{background:var(--blue-bg);border-color:var(--blue);}
+.drop-zone p{font-size:12px;color:var(--text2);margin:0;font-family:var(--mono);}
+.drop-zone span{color:var(--blue);cursor:pointer;}
+.note-img-preview{width:100%;border-radius:var(--radius);border:1px solid var(--border);display:block;margin-bottom:8px;cursor:zoom-in;}
+.note-img-meta{display:flex;justify-content:space-between;align-items:center;}
+.note-img-name{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.note-del-img{font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--mono);}
+.note-actions{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;gap:10px;}
+.note-del-btn{font-size:12px;font-family:var(--mono);color:var(--red);background:none;border:1px solid #f0b8b3;border-radius:var(--radius);padding:7px 14px;cursor:pointer;}
+.note-del-btn:hover{background:var(--red-bg);}
+.note-badge{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);position:absolute;top:-3px;right:-3px;}
+.note-btn-wrap{position:relative;display:inline-flex;}
+.hist-entry{padding:12px 20px;border-bottom:1px solid var(--border);}
+.hist-entry:last-child{border-bottom:none;}
+.hist-time{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;}
+.hist-desc{font-size:12px;color:var(--text);}
+.hist-empty{padding:32px 20px;text-align:center;font-size:13px;font-family:var(--mono);color:var(--text3);}
 
 /* TOAST */
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 11px 18px; border-radius: var(--radius); font-size: 13px; font-family: var(--mono); opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 200; }
@@ -392,6 +424,52 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
   </div>
 </div>
 
+
+<!-- NOTES MODAL -->
+<div class="note-modal-overlay" id="note-modal">
+  <div class="note-modal">
+    <div class="note-modal-header">
+      <div><div class="note-modal-title" id="note-modal-title">Notas</div><div class="note-modal-sub" id="note-modal-sub"></div></div>
+      <button class="modal-close" onclick="closeNoteModal()">x</button>
+    </div>
+    <div class="note-section">
+      <div class="note-section-label">Observacion</div>
+      <textarea class="note-textarea" id="note-text" placeholder="Escribe una observacion sobre este producto..."></textarea>
+    </div>
+    <div class="note-section">
+      <div class="note-section-label">Captura de pantalla</div>
+      <div id="note-img-wrap" style="display:none">
+        <img class="note-img-preview" id="note-img-preview" src="" alt="captura" onclick="openImgFull()"/>
+        <div class="note-img-meta"><span class="note-img-name" id="note-img-name"></span><button class="note-del-img" onclick="removeNoteImg()">eliminar imagen</button></div>
+      </div>
+      <div class="drop-zone" id="note-drop-zone" onclick="document.getElementById('note-file-input').click()" ondragover="event.preventDefault()" ondrop="handleImgDrop(event)">
+        <p>Arrastra una imagen aqui o Ctrl+V para pegar, o <span>selecciona un archivo</span></p>
+      </div>
+      <input type="file" id="note-file-input" accept="image/*" style="display:none" onchange="handleNoteFileSelect(event)">
+    </div>
+    <div class="note-actions">
+      <button class="note-del-btn" id="note-del-btn" onclick="deleteNote()" style="display:none">eliminar nota</button>
+      <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="btn-secondary" onclick="closeNoteModal()">cancelar</button>
+        <button class="btn-primary" onclick="saveNote()">guardar nota</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- HISTORY MODAL -->
+<div class="note-modal-overlay" id="hist-modal">
+  <div class="note-modal" style="max-width:500px">
+    <div class="note-modal-header">
+      <div><div class="note-modal-title" id="hist-modal-title">Historial</div><div class="note-modal-sub" id="hist-modal-sub"></div></div>
+      <button class="modal-close" onclick="closeHistModal()">x</button>
+    </div>
+    <div id="hist-content"></div>
+  </div>
+</div>
+<!-- IMG FULLSCREEN -->
+<div class="note-modal-overlay" id="img-full-modal" onclick="closeImgFull()" style="z-index:400">
+  <img id="img-full-src" src="" style="max-width:92vw;max-height:88vh;border-radius:8px;display:block"/>
+</div>
 <div class="toast" id="toast"></div>
 <div class="field-dropdown" id="field-dropdown" style="display:none">
   <div class="field-dropdown-label">cambiar estado</div>
@@ -456,6 +534,8 @@ let nextIds   = {ES:100,IT:100,FR:100,GER:100,BEL:100,UK:100};
 let currentMP = "ES";
 let activeFilter = "all";
 let editIndex = -1;
+let _noteAsin = '';
+let _noteImg = null;
 let currentPage = 1;
 const PAGE_SIZE = 10;
 
@@ -544,7 +624,7 @@ async function saveProduct(){
     titulo:document.getElementById("f-titulo").value,
     desc:document.getElementById("f-desc").value,
     bullets:document.getElementById("f-bullets").value,
-    link,producto:prod};
+    link,producto:prod,createdAt:new Date().toISOString(),nota:'',notaImg:'',notaImgName:'',notaUpdatedAt:'',historial:[]};
   if(!ALL_DATA[mp]) ALL_DATA[mp]=[];
   ALL_DATA[mp].push(entry);
   saveLocal();
@@ -591,6 +671,13 @@ async function applyEdit(){
     titulo:document.getElementById("e-titulo").value,
     desc:document.getElementById("e-desc").value,
     bullets:document.getElementById("e-bullets").value};
+  // Log changes
+  const _prev=ALL_DATA[currentMP][editIndex];
+  const _ch=[];
+  if(_prev.producto!==updated.producto) _ch.push('Nombre actualizado');
+  FIELDS.forEach(f=>{if(_prev[f]!==updated[f]) _ch.push(FNAME[f]+': '+_prev[f]+' -> '+updated[f]);});
+  if(_prev.link!==updated.link) _ch.push('Link actualizado');
+  if(_ch.length){const _h=Array.isArray(_prev.historial)?[..._prev.historial]:[];_h.unshift({ts:new Date().toISOString(),tipo:'edicion',desc:_ch.join(' | ')});updated.historial=_h;}
   ALL_DATA[currentMP][editIndex]=updated;
   saveLocal();refresh();closeEdit();
   toast("Guardado localmente \u2713");
@@ -800,11 +887,16 @@ function renderTable(){
         '<div class="dot '+dotClass(d[f])+'" title="'+FLABELS[i]+': '+d[f]+'" data-asin="'+asin+'" data-field="'+f+'" onclick="openFieldDropdown(event,this)">'+dotLabel(d[f])+'</div>'
       ).join("");
       return '<tr>'+
-        '<td><div class="asin-code">'+asin+'</div><div class="mp-tag">'+(d.mp||currentMP)+'</div></td>'+
+        '<td><div class="asin-code">'+asin+'</div><div class="mp-tag">'+(d.mp||currentMP)+'</div>'+(d.createdAt?'<div class="mp-tag" style="color:var(--text3);margin-top:2px">'+new Date(d.createdAt).toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})+'</div>':'')+'</td>'+
         '<td><div class="prod-name">'+nameHTML+hints+'</div></td>'+
         '<td><div class="dots-row">'+dots+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
         '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
-        '<td><button class="act-btn" onclick="openEdit('+idx+')">editar</button><button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button></td>'+
+        '<td>'+
+        '<button class="act-btn" onclick="openEdit('+idx+')">editar</button>'+
+        '<span class="note-btn-wrap" style="display:inline-flex;position:relative"><button class="act-btn" style="padding:4px 7px" onclick="openNoteModal(\''+asin+'\')">&#128221;'+(d.nota||d.notaImg?'<span class="note-badge"></span>':'')+'</button></span>'+
+        '<button class="act-btn" style="padding:4px 7px" onclick="openHistModal(\''+asin+'\')">&#128336;</button>'+
+        '<button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button>'+
+        '</td>'+
         '</tr>';
     }).join("");
 
@@ -914,7 +1006,9 @@ async function applyFieldValue(val) {
   if (idx < 0) return;
   const d = ALL_DATA[currentMP][idx];
   if (d[_fieldDropKey] === val) { _fieldDropAsin = ""; _fieldDropKey = ""; return; }
-  const updated = { ...d, [_fieldDropKey]: val };
+  const _hf=Array.isArray(d.historial)?[...d.historial]:[];
+  _hf.unshift({ts:new Date().toISOString(),tipo:'check',desc:FNAME[_fieldDropKey]+': '+d[_fieldDropKey]+' -> '+val});
+  const updated = { ...d, [_fieldDropKey]: val, historial:_hf };
   ALL_DATA[currentMP][idx] = updated;
   saveLocal();
   refresh();
@@ -936,6 +1030,120 @@ document.addEventListener("click",function(e){
 });
 document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target===this) closeEdit();});
 
+
+// Notes
+function openNoteModal(asin){
+  _noteAsin=asin;
+  const d=(ALL_DATA[currentMP]||[]).find(x=>x.asin===asin)||{};
+  document.getElementById("note-modal-title").textContent="Notas - "+asin;
+  document.getElementById("note-modal-sub").textContent=d.producto||"";
+  document.getElementById("note-text").value=d.nota||"";
+  _noteImg=d.notaImg?{data:d.notaImg,name:d.notaImgName||"imagen"}:null;
+  renderNoteImg();
+  document.getElementById("note-del-btn").style.display=(d.nota||d.notaImg)?"block":"none";
+  document.getElementById("note-modal").classList.add("open");
+  document.addEventListener("paste",handlePaste);
+}
+function closeNoteModal(){
+  document.getElementById("note-modal").classList.remove("open");
+  document.removeEventListener("paste",handlePaste);
+  _noteAsin="";_noteImg=null;
+}
+function renderNoteImg(){
+  const wrap=document.getElementById("note-img-wrap");
+  const zone=document.getElementById("note-drop-zone");
+  if(_noteImg){
+    document.getElementById("note-img-preview").src=_noteImg.data;
+    document.getElementById("note-img-name").textContent=_noteImg.name;
+    wrap.style.display="block";zone.style.display="none";
+  }else{wrap.style.display="none";zone.style.display="block";}
+}
+function removeNoteImg(){_noteImg=null;renderNoteImg();}
+function openImgFull(){
+  if(!_noteImg)return;
+  document.getElementById("img-full-src").src=_noteImg.data;
+  document.getElementById("img-full-modal").classList.add("open");
+}
+function closeImgFull(){document.getElementById("img-full-modal").classList.remove("open");}
+function handlePaste(e){
+  const items=e.clipboardData&&e.clipboardData.items;if(!items)return;
+  for(let i=0;i<items.length;i++){
+    if(items[i].type.startsWith("image/")){e.preventDefault();readImgFile(items[i].getAsFile(),"captura_pegada.png");break;}
+  }
+}
+function handleImgDrop(e){
+  e.preventDefault();const file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith("image/"))readImgFile(file,file.name);
+}
+function handleNoteFileSelect(ev){
+  const file=ev.target.files[0];if(file)readImgFile(file,file.name);ev.target.value="";
+}
+function readImgFile(file,name){
+  if(file.size>1.5*1024*1024){toast("Imagen muy grande (max 1.5 MB)");return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=900;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
+      canvas.getContext("2d").drawImage(img,0,0,w,h);
+      _noteImg={data:canvas.toDataURL("image/jpeg",0.75),name};renderNoteImg();
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(file);
+}
+async function saveNote(){
+  if(!_noteAsin)return;
+  const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
+  const prev=ALL_DATA[currentMP][idx];
+  const nota=document.getElementById("note-text").value.trim();
+  const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
+  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:nota?"Nota actualizada":"Nota guardada sin texto"});
+  const updated={...prev,nota,notaImg:_noteImg?_noteImg.data:"",notaImgName:_noteImg?_noteImg.name:"",notaUpdatedAt:new Date().toISOString(),historial:hist};
+  ALL_DATA[currentMP][idx]=updated;saveLocal();refresh();closeNoteModal();
+  toast("Nota guardada");
+  try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado");updateLastSync();}}
+  catch(e){setSyncStatus("err","local ok - sin nube");}
+}
+async function deleteNote(){
+  if(!_noteAsin)return;
+  if(!confirm("Eliminar la nota de este producto?"))return;
+  const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
+  const prev=ALL_DATA[currentMP][idx];
+  const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
+  hist.unshift({ts:new Date().toISOString(),tipo:"nota",desc:"Nota eliminada"});
+  const updated={...prev,nota:"",notaImg:"",notaImgName:"",notaUpdatedAt:"",historial:hist};
+  ALL_DATA[currentMP][idx]=updated;saveLocal();refresh();closeNoteModal();
+  toast("Nota eliminada");
+  try{const res=await apiPost({action:"update",mp:currentMP,entry:updated});if(res.ok){setSyncStatus("ok","guardado");updateLastSync();}}
+  catch(e){setSyncStatus("err","local ok - sin nube");}
+}
+// History
+function openHistModal(asin){
+  const d=(ALL_DATA[currentMP]||[]).find(x=>x.asin===asin)||{};
+  document.getElementById("hist-modal-title").textContent="Historial - "+asin;
+  document.getElementById("hist-modal-sub").textContent=d.producto||"";
+  const hist=Array.isArray(d.historial)?d.historial:[];
+  const icons={edicion:"e",check:"c",nota:"n"};
+  const tipos={edicion:"Edicion",check:"Check",nota:"Nota"};
+  let html=hist.length===0?'<div class="hist-empty">Sin cambios registrados aun</div>':
+    hist.map(h=>{
+      const d2=new Date(h.ts);
+      const fmt=d2.toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})+" - "+d2.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+      return '<div class="hist-entry"><div class="hist-time">'+(tipos[h.tipo]||h.tipo)+" - "+fmt+'</div><div class="hist-desc">'+h.desc+'</div></div>';
+    }).join("");
+  if(d.createdAt){
+    const dc=new Date(d.createdAt);
+    const fmtc=dc.toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"})+" - "+dc.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+    html+='<div class="hist-entry"><div class="hist-time">Creado - '+fmtc+'</div><div class="hist-desc">Producto agregado al inventario</div></div>';
+  }
+  document.getElementById("hist-content").innerHTML=html;
+  document.getElementById("hist-modal").classList.add("open");
+}
+function closeHistModal(){document.getElementById("hist-modal").classList.remove("open");}
+
+document.getElementById("note-modal").addEventListener("click",function(e){if(e.target===this)closeNoteModal();});
+document.getElementById("hist-modal").addEventListener("click",function(e){if(e.target===this)closeHistModal();});
 loadFromCloud();
 setInterval(()=>loadFromCloud(true),120000);
 </script>
