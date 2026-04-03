@@ -697,6 +697,26 @@ async function apiGet(params){
   return r.json();
 }
 async function apiPost(body){
+  // Serialize notas and historial to JSON strings before sending to Sheets
+  if(body.entry){
+    const e={...body.entry};
+    if(Array.isArray(e.notas)) e.notas=JSON.stringify(e.notas);
+    if(Array.isArray(e.historial)) e.historial=JSON.stringify(e.historial);
+    body={...body,entry:e};
+  }
+  if(body.data){
+    // bulkImport: serialize all entries
+    const d={};
+    Object.keys(body.data).forEach(mp=>{
+      d[mp]=(body.data[mp]||[]).map(e=>{
+        const c={...e};
+        if(Array.isArray(c.notas)) c.notas=JSON.stringify(c.notas);
+        if(Array.isArray(c.historial)) c.historial=JSON.stringify(c.historial);
+        return c;
+      });
+    });
+    body={...body,data:d};
+  }
   // Apps Script requiere text/plain para evitar preflight CORS
   // y redirect:follow para manejar el redirect 302 que hace Google
   const r=await fetch(SCRIPT_URL,{
@@ -739,9 +759,13 @@ async function loadFromCloud(isAutoSync){
 function normalizeProducts(){
   MARKETPLACES.forEach(mp=>{
     (ALL_DATA[mp]||[]).forEach(d=>{
-      if(!Array.isArray(d.notas)) d.notas=[];
+      // notas: parse from JSON string if needed (Sheets stores as serialized JSON)
+      if(!Array.isArray(d.notas)){
+        try{d.notas=typeof d.notas==='string'&&d.notas?JSON.parse(d.notas):[];}catch(e){d.notas=[];}
+      }
+      // historial: same treatment
       if(!Array.isArray(d.historial)){
-        try{d.historial=typeof d.historial==='string'?JSON.parse(d.historial):[];}catch(e){d.historial=[];}
+        try{d.historial=typeof d.historial==='string'&&d.historial?JSON.parse(d.historial):[];}catch(e){d.historial=[];}
       }
       if(!d.createdAt) d.createdAt='';
     });
@@ -900,6 +924,7 @@ function getFiltered(){
     if(activeFilter==="complete") return score(d)===5;
     if(activeFilter==="pending") return FIELDS.some(f=>d[f]==="NO");
     if(activeFilter==="wip") return FIELDS.some(f=>d[f]==="En proceso");
+    if(activeFilter==="tareas") return Array.isArray(d.notas)&&d.notas.some(n=>n.tipo==='tarea'&&n.estado==='pendiente');
     if(FIELDS.includes(activeFilter)) return d[activeFilter]!=="OK";
     return true;
   });
@@ -986,6 +1011,7 @@ function renderFilters(){
     complete:data.filter(d=>score(d)===5).length,
     pending:data.filter(d=>FIELDS.some(f=>d[f]==="NO")).length,
     wip:data.filter(d=>FIELDS.some(f=>d[f]==="En proceso")).length,
+    tareas:data.filter(d=>Array.isArray(d.notas)&&d.notas.some(n=>n.tipo==='tarea'&&n.estado==='pendiente')).length,
     img:data.filter(d=>d.img!=="OK").length,
     aplus:data.filter(d=>d.aplus!=="OK").length,
     titulo:data.filter(d=>d.titulo!=="OK").length,
@@ -997,6 +1023,7 @@ function renderFilters(){
     complete:"completos",
     pending:"pendientes",
     wip:"en proceso",
+    tareas:"tareas pendientes",
     img:"im\u00e1genes",
     aplus:"contenido A+",
     titulo:"t\u00edtulo",
@@ -1045,10 +1072,10 @@ function renderTable(){
         '<td><div class="dots-row">'+dots+'</div><div class="dots-labels">'+FLABELS.join(" \u00b7 ")+'</div></td>'+
         '<td><div class="score-num" style="color:'+scoreColor(s)+'">'+s+'/5</div><div class="score-bar"><div class="score-fill" style="width:'+pct+'%;background:'+scoreColor(s)+'"></div></div></td>'+
         '<td>'+
-        '<button class="act-btn" onclick="openEdit('+idx+')">editar</button>'+
-        (()=>{const ns=Array.isArray(d.notas)?d.notas:[];const pend=ns.filter(n=>n.tipo==='tarea'&&n.estado==='pendiente').length;const badge=pend>0?' <span style="background:var(--amber);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-family:var(--mono)">'+pend+'</span>':'';return '<button class="act-btn" onclick="openNewNoteModal(\''+asin+'\')" style="font-size:11px">+ nota</button><button class="act-btn" onclick="openNotesPanel(\''+asin+'\')" style="font-size:11px">ver notas'+badge+'</button>';})()+''+
-        '<button class="act-btn" onclick="openHistModal(\''+asin+'\')" style="font-size:11px">historial</button>'+
-        '<button class="act-btn del" onclick="deleteProduct('+idx+')">\u2715</button>'+
+        '<button class="act-btn" onclick="openEdit('+idx+')">✏️ editar</button>'+
+        (()=>{const ns=Array.isArray(d.notas)?d.notas:[];const pend=ns.filter(n=>n.tipo==='tarea'&&n.estado==='pendiente').length;const badge=pend>0?' <span style="background:var(--amber);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-family:var(--mono)">'+pend+'</span>':'';return '<button class="act-btn" onclick="openNewNoteModal(\''+asin+'\')" style="font-size:11px">📝 + nota</button><button class="act-btn" onclick="openNotesPanel(\''+asin+'\')" style="font-size:11px">💬 notas'+badge+'</button>';})()+''+
+        '<button class="act-btn" onclick="openHistModal(\''+asin+'\')" style="font-size:11px">🕐 historial</button>'+
+        '<button class="act-btn del" onclick="deleteProduct('+idx+')">🗑️</button>'+
         '</td>'+
         '</tr>';
     }).join("");
