@@ -692,7 +692,7 @@ function updateLastSync(){
 // ── API ──────────────────────────────────────────────────────
 async function apiGet(params){
   const qs=new URLSearchParams({...params,_t:Date.now()}).toString();
-  const r=await fetch(SCRIPT_URL+"?"+qs, {redirect:"follow"});
+  const r=await fetch(SCRIPT_URL+"?"+qs, {redirect:"follow",credentials:"omit"});
   if(!r.ok) throw new Error("HTTP "+r.status);
   return r.json();
 }
@@ -703,7 +703,8 @@ async function apiPost(body){
     method:"POST",
     headers:{"Content-Type":"text/plain;charset=utf-8"},
     body:JSON.stringify(body),
-    redirect:"follow"
+    redirect:"follow",
+    credentials:"omit"
   });
   if(!r.ok) throw new Error("HTTP "+r.status);
   return r.json();
