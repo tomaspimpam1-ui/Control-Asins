@@ -876,6 +876,7 @@ function getFiltered(){
     if(activeFilter==="pending") return FIELDS.some(f=>d[f]==="NO");
     if(activeFilter==="wip") return FIELDS.some(f=>d[f]==="En proceso");
     if(activeFilter==="tareas") return Array.isArray(d.notas)&&d.notas.some(n=>n.tipo==='tarea'&&n.estado==='pendiente');
+    if(activeFilter==="observaciones") return Array.isArray(d.notas)&&d.notas.some(n=>n.tipo==='obs');
     if(FIELDS.includes(activeFilter)) return d[activeFilter]!=="OK";
     return true;
   });
@@ -963,6 +964,7 @@ function renderFilters(){
     pending:data.filter(d=>FIELDS.some(f=>d[f]==="NO")).length,
     wip:data.filter(d=>FIELDS.some(f=>d[f]==="En proceso")).length,
     tareas:data.filter(d=>Array.isArray(d.notas)&&d.notas.some(n=>n.tipo==='tarea'&&n.estado==='pendiente')).length,
+    observaciones:data.filter(d=>Array.isArray(d.notas)&&d.notas.some(n=>n.tipo==='obs')).length,
     img:data.filter(d=>d.img!=="OK").length,
     aplus:data.filter(d=>d.aplus!=="OK").length,
     titulo:data.filter(d=>d.titulo!=="OK").length,
@@ -975,6 +977,7 @@ function renderFilters(){
     pending:"pendientes",
     wip:"en proceso",
     tareas:"tareas pendientes",
+    observaciones:"observaciones",
     img:"im\u00e1genes",
     aplus:"contenido A+",
     titulo:"t\u00edtulo",
