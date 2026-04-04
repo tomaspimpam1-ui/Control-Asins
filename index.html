@@ -1227,7 +1227,7 @@ function openNewNoteModal(asin){
   _nnmImg=null;
   const d=(ALL_DATA[currentMP]||[]).find(x=>x.asin===asin)||{};
   document.getElementById('nnm-title').textContent='Nueva nota · '+asin;
-  document.getElementById('nnm-author').value='';
+  document.getElementById('nnm-author').value=getSavedAuthor();
   document.getElementById('nnm-text').value='';
   document.getElementById('nnm-type').value='obs';
   document.getElementById('nnm-img-wrap').style.display='none';
@@ -1282,11 +1282,13 @@ async function submitNewNote(){
   if(_noteAsin&&document.getElementById('notes-panel').classList.contains('open')){
     renderNotesPanel(updated);
   }
+  setSyncStatus('loading','sincronizando...');
   try{
     console.log('[ASIN debug] Sending to API:',{action:'update',notas_type:typeof updated.notas,notas_isArray:Array.isArray(updated.notas)});
     const res=await apiPost({action:'update',mp:currentMP,entry:updated});
     console.log('[ASIN debug] API response:',res);
     if(res.ok){setSyncStatus('ok','guardado ✓');updateLastSync();}
+    else{setSyncStatus('err','local ok · sin nube');}
   }
   catch(e){console.log('[ASIN debug] API error:',e.message);setSyncStatus('err','local ok · sin nube');}
 }
