@@ -250,7 +250,6 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
 .nc-type-done{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--green-bg);color:var(--green);border:1px solid #b8dfc4;font-family:var(--mono);margin-left:auto;}
 .nc-text{font-size:13px;color:var(--text);line-height:1.55;margin:0;}
 .nc-text.done{text-decoration:line-through;color:var(--text3);}
-.nc-img{width:100%;display:block;max-height:160px;object-fit:cover;border-top:1px solid var(--border);cursor:zoom-in;}
 .nc-actions{display:flex;gap:6px;padding:7px 14px;border-top:1px solid var(--border);background:var(--surface2);}
 .nc-btn{font-size:11px;font-family:var(--mono);padding:4px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);transition:all .12s;}
 .nc-btn:hover{background:var(--surface);color:var(--text);}
@@ -497,11 +496,7 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
     <div id="hist-content" style="overflow-y:auto;max-height:calc(85vh - 80px)"></div>
   </div>
 </div>
-<!-- IMG FULLSCREEN -->
-<div class="note-modal-overlay" id="img-full-modal" onclick="closeImgFull()" style="z-index:400">
-  <img id="img-full-src" src="" style="max-width:92vw;max-height:88vh;border-radius:8px;display:block"/>
-</div>
-</div><!-- end app-main -->
+<!-- end app-main -->
 <div class="notes-panel" id="notes-panel">
   <div class="notes-panel-inner">
     <div class="notes-panel-hdr">
@@ -534,20 +529,9 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
       </select>
     </div>
     <textarea class="new-note-txt" id="nnm-text" placeholder="Escribe una nota o tarea..." style="width:100%;margin-bottom:10px"></textarea>
-    <div class="new-note-img-preview" id="nnm-img-wrap" style="display:none">
-      <span class="new-note-img-name" id="nnm-img-name"></span>
-      <button onclick="removeNnmImg()" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--mono)">eliminar</button>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
-      <div style="display:flex;gap:6px">
-        <button class="export-btn" onclick="document.getElementById('nnm-file').click()">+ imagen</button>
-        <span style="font-size:11px;font-family:var(--mono);color:var(--text3);line-height:32px">o arrastra / Ctrl+V</span>
-        <input type="file" id="nnm-file" accept="image/*" style="display:none" onchange="handleNnmFile(event)">
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-secondary" onclick="closeNewNoteModal()">cancelar</button>
-        <button class="btn-primary" onclick="submitNewNote()">agregar nota</button>
-      </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+      <button class="btn-secondary" onclick="closeNewNoteModal()">cancelar</button>
+      <button class="btn-primary" onclick="submitNewNote()">agregar nota</button>
     </div>
   </div>
 </div>
@@ -560,28 +544,7 @@ tbody tr:hover .score-num { letter-spacing: .02em; }
       <button class="modal-close" onclick="closeEditNoteModal()" style="font-size:20px">×</button>
     </div>
     <textarea class="new-note-txt" id="enm-text" style="width:100%;margin-bottom:10px"></textarea>
-    <!-- Current image preview -->
-    <div id="enm-img-current" style="display:none;margin-bottom:10px">
-      <div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:6px">Imagen actual:</div>
-      <div style="position:relative;display:inline-block">
-        <img id="enm-img-preview" src="" style="max-width:100%;max-height:180px;border-radius:var(--radius);border:1px solid var(--border);display:block;cursor:zoom-in" onclick="openImgFullSrc(this.src)"/>
-        <button onclick="removeEnmImg()" style="position:absolute;top:6px;right:6px;background:var(--red);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1" title="Eliminar imagen">×</button>
-      </div>
-    </div>
-    <!-- New image selection -->
-    <div id="enm-img-new" style="display:none;margin-bottom:10px">
-      <div class="new-note-img-preview" style="display:flex">
-        <span class="new-note-img-name" id="enm-img-new-name"></span>
-        <button onclick="removeEnmNewImg()" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--mono)">eliminar</button>
-      </div>
-    </div>
-    <!-- Add/change image buttons -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <button class="export-btn" onclick="document.getElementById('enm-file').click()" style="font-size:11px;padding:5px 12px" id="enm-img-btn">+ imagen</button>
-      <span style="font-size:11px;font-family:var(--mono);color:var(--text3)">o pega con Ctrl+V</span>
-      <input type="file" id="enm-file" accept="image/*" style="display:none" onchange="handleEnmFile(event)">
-    </div>
-    <div style="display:flex;justify-content:flex-end;gap:8px">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
       <button class="btn-secondary" onclick="closeEditNoteModal()">cancelar</button>
       <button class="btn-primary" onclick="submitEditNote()">guardar cambios</button>
     </div>
@@ -1215,48 +1178,22 @@ function removeNewNoteImg(){
 
 // ── Open note modal ───────────────────────────────────────────
 // ── Notes state ──────────────────────────────────────────────
-let _nnmImg = null;
 let _editNoteId = null;
-let _enmImgData = null;   // current or new image data for edit modal
-let _enmImgAction = null; // null=no change, 'replace'=new img, 'remove'=delete img
 
 // getSavedAuthor and saveAuthor already defined above
 
 // ── New Note Modal ────────────────────────────────────────────
 function openNewNoteModal(asin){
   _noteAsin=asin;
-  _nnmImg=null;
   const d=(ALL_DATA[currentMP]||[]).find(x=>x.asin===asin)||{};
   document.getElementById('nnm-title').textContent='Nueva nota · '+asin;
   document.getElementById('nnm-author').value=getSavedAuthor();
   document.getElementById('nnm-text').value='';
   document.getElementById('nnm-type').value='obs';
-  document.getElementById('nnm-img-wrap').style.display='none';
   document.getElementById('new-note-modal').classList.add('open');
-  document.addEventListener('paste',handleNnmPaste);
 }
 function closeNewNoteModal(){
   document.getElementById('new-note-modal').classList.remove('open');
-  document.removeEventListener('paste',handleNnmPaste);
-  _nnmImg=null;
-}
-function removeNnmImg(){_nnmImg=null;document.getElementById('nnm-img-wrap').style.display='none';}
-function handleNnmPaste(e){
-  const items=e.clipboardData&&e.clipboardData.items;if(!items)return;
-  for(let i=0;i<items.length;i++){
-    if(items[i].type.startsWith('image/')){e.preventDefault();readImgFile(items[i].getAsFile(),'captura_pegada.png',r=>{_nnmImg=r;showNnmImg(r.name);});break;}
-  }
-}
-function handleNnmFile(ev){
-  const file=ev.target.files[0];if(file)readImgFile(file,file.name,r=>{_nnmImg=r;showNnmImg(r.name);});ev.target.value='';
-}
-function showNnmImg(name){
-  document.getElementById('nnm-img-name').textContent=name;
-  document.getElementById('nnm-img-wrap').style.display='flex';
-}
-function handleImgDrop(e){
-  e.preventDefault();const file=e.dataTransfer.files[0];
-  if(file&&file.type.startsWith('image/'))readImgFile(file,file.name,r=>{_nnmImg=r;showNnmImg(r.name);});
 }
 
 async function submitNewNote(){
@@ -1269,7 +1206,7 @@ async function submitNewNote(){
   const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);if(idx<0)return;
   const prev=ALL_DATA[currentMP][idx];
   const notas=Array.isArray(prev.notas)?[...prev.notas]:[];
-  const newNota={id:Date.now(),ts:new Date().toISOString(),autor,tipo,estado:tipo==='tarea'?'pendiente':'',texto,img:_nnmImg?_nnmImg.data:''};
+  const newNota={id:Date.now(),ts:new Date().toISOString(),autor,tipo,estado:tipo==='tarea'?'pendiente':'',texto};
   notas.push(newNota);
   const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
   hist.unshift({ts:new Date().toISOString(),tipo:'nota',desc:autor+' agrego '+(tipo==='tarea'?'tarea':'observacion')+': '+texto.slice(0,60)});
@@ -1322,7 +1259,6 @@ function renderNotesPanel(d){
     const badgeCls=n.tipo==='obs'?'nc-type-obs':n.estado==='listo'?'nc-type-done':'nc-type-pend';
     const badgeTxt=n.tipo==='obs'?'observacion':n.estado==='listo'?'tarea · listo':'tarea · pendiente';
     const textCls=n.estado==='listo'?'nc-text done':'nc-text';
-    const imgHTML=n.img?'<img class="nc-img" src="'+esc(n.img)+'" onclick="openImgFullSrc(this.src)" style="cursor:zoom-in"/>':'';
     const doneBtn=n.tipo==='tarea'&&n.estado==='pendiente'?'<button class="nc-btn nc-btn-done" onclick="markNoteDone(\''+n.id+'\')">marcar listo</button>':'';
     return '<div class="nc">'+
       '<div class="nc-top">'+
@@ -1334,7 +1270,6 @@ function renderNotesPanel(d){
       '</div>'+
       '<p class="'+textCls+'">'+esc(n.texto)+'</p>'+
       '</div>'+
-      imgHTML+
       '<div class="nc-actions">'+doneBtn+
       '<button class="nc-btn" onclick="openEditNoteModal(\''+n.id+'\')">editar</button>'+
       '<button class="nc-btn nc-btn-del" onclick="deleteNoteItem(\''+n.id+'\')">eliminar</button>'+
@@ -1346,90 +1281,15 @@ function renderNotesPanel(d){
 // ── Edit Note Modal ───────────────────────────────────────────
 function openEditNoteModal(noteId){
   _editNoteId=noteId;
-  _enmImgData=null;
-  _enmImgAction=null;
   const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);
   if(idx<0)return;
   const nota=(ALL_DATA[currentMP][idx].notas||[]).find(n=>String(n.id)===String(noteId));
   document.getElementById('enm-text').value=nota?nota.texto:'';
-  // Show current image if exists
-  const currentWrap=document.getElementById('enm-img-current');
-  const newWrap=document.getElementById('enm-img-new');
-  newWrap.style.display='none';
-  if(nota&&nota.img){
-    document.getElementById('enm-img-preview').src=nota.img;
-    currentWrap.style.display='block';
-    document.getElementById('enm-img-btn').textContent='cambiar imagen';
-  }else{
-    currentWrap.style.display='none';
-    document.getElementById('enm-img-btn').textContent='+ imagen';
-  }
   document.getElementById('edit-note-modal').classList.add('open');
-  document.addEventListener('paste',handleEnmPaste);
 }
 function closeEditNoteModal(){
   document.getElementById('edit-note-modal').classList.remove('open');
-  document.removeEventListener('paste',handleEnmPaste);
   _editNoteId=null;
-  _enmImgData=null;
-  _enmImgAction=null;
-}
-// Remove existing image
-function removeEnmImg(){
-  _enmImgAction='remove';
-  _enmImgData=null;
-  document.getElementById('enm-img-current').style.display='none';
-  document.getElementById('enm-img-new').style.display='none';
-  document.getElementById('enm-img-btn').textContent='+ imagen';
-}
-// Remove newly selected image (go back to original state)
-function removeEnmNewImg(){
-  _enmImgAction=null;
-  _enmImgData=null;
-  document.getElementById('enm-img-new').style.display='none';
-  // Restore original image preview if it existed
-  const idx=(ALL_DATA[currentMP]||[]).findIndex(d=>d.asin===_noteAsin);
-  if(idx>=0){
-    const nota=(ALL_DATA[currentMP][idx].notas||[]).find(n=>String(n.id)===String(_editNoteId));
-    if(nota&&nota.img){
-      document.getElementById('enm-img-preview').src=nota.img;
-      document.getElementById('enm-img-current').style.display='block';
-      document.getElementById('enm-img-btn').textContent='cambiar imagen';
-    }else{
-      document.getElementById('enm-img-btn').textContent='+ imagen';
-    }
-  }
-}
-// Handle file select
-function handleEnmFile(ev){
-  const file=ev.target.files[0];
-  if(file)readImgFile(file,file.name,r=>{
-    _enmImgData=r;
-    _enmImgAction='replace';
-    document.getElementById('enm-img-current').style.display='none';
-    document.getElementById('enm-img-new-name').textContent=r.name;
-    document.getElementById('enm-img-new').style.display='block';
-    document.getElementById('enm-img-btn').textContent='cambiar imagen';
-  });
-  ev.target.value='';
-}
-// Handle paste
-function handleEnmPaste(e){
-  const items=e.clipboardData&&e.clipboardData.items;if(!items)return;
-  for(let i=0;i<items.length;i++){
-    if(items[i].type.startsWith('image/')){
-      e.preventDefault();
-      readImgFile(items[i].getAsFile(),'captura_pegada.png',r=>{
-        _enmImgData=r;
-        _enmImgAction='replace';
-        document.getElementById('enm-img-current').style.display='none';
-        document.getElementById('enm-img-new-name').textContent=r.name;
-        document.getElementById('enm-img-new').style.display='block';
-        document.getElementById('enm-img-btn').textContent='cambiar imagen';
-      });
-      break;
-    }
-  }
 }
 // Submit edit
 async function submitEditNote(){
@@ -1440,16 +1300,10 @@ async function submitEditNote(){
   const prev=ALL_DATA[currentMP][idx];
   const notas=(Array.isArray(prev.notas)?[...prev.notas]:[]).map(n=>{
     if(String(n.id)!==String(_editNoteId)) return n;
-    const updated={...n,texto};
-    if(_enmImgAction==='replace'&&_enmImgData) updated.img=_enmImgData.data;
-    else if(_enmImgAction==='remove') updated.img='';
-    return updated;
+    return {...n,texto};
   });
   const hist=Array.isArray(prev.historial)?[...prev.historial]:[];
-  const changes=['Nota editada: '+texto.slice(0,40)];
-  if(_enmImgAction==='replace') changes.push('imagen actualizada');
-  if(_enmImgAction==='remove') changes.push('imagen eliminada');
-  hist.unshift({ts:new Date().toISOString(),tipo:'nota',desc:changes.join(' · ')});
+  hist.unshift({ts:new Date().toISOString(),tipo:'nota',desc:'Nota editada: '+texto.slice(0,40)});
   const updated={...prev,notas,historial:hist};
   ALL_DATA[currentMP][idx]=updated;saveLocal();
   renderNotesPanel(updated);refresh();
@@ -1491,31 +1345,6 @@ function deleteNoteItem(noteId){
     catch(e){setSyncStatus('err','local ok · sin nube');}
   });
 }
-
-// ── Image helpers ─────────────────────────────────────────────
-function readImgFile(file,name,cb){
-  if(file.size>1.5*1024*1024){toast('Imagen muy grande (max 1.5 MB)');return;}
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const MAX=900;let w=img.width,h=img.height;
-      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
-      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      if(cb)cb({data:canvas.toDataURL('image/jpeg',0.75),name});
-    };img.src=ev.target.result;
-  };reader.readAsDataURL(file);
-}
-function openImgFullSrc(src){
-  document.getElementById('img-full-src').src=src;
-  document.getElementById('img-full-modal').classList.add('open');
-}
-function openImgFull(){
-  document.getElementById('img-full-src').src=_nnmImg?_nnmImg.data:'';
-  document.getElementById('img-full-modal').classList.add('open');
-}
-function closeImgFull(){document.getElementById('img-full-modal').classList.remove('open');}
 
 // Legacy compat
 function saveNote(){}
